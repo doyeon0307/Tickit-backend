@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"std/github.com/dodo/Tickit-backend/common"
 	"std/github.com/dodo/Tickit-backend/domain"
+	"std/github.com/dodo/Tickit-backend/dto"
+	"std/github.com/dodo/Tickit-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,16 +14,19 @@ type TicketHandler struct {
 	ticketUseCase domain.TicketUsecase
 }
 
-func NewTicketHandler(r *gin.Engine, usecase domain.TicketUsecase) {
+func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 	handler := &TicketHandler{
 		ticketUseCase: usecase,
 	}
 
-	r.GET("/ticket", handler.GetTicketPreviews)
-	r.GET("/ticket/:id")
-	r.POST("/ticket")
-	r.PUT("/ticket/:id")
-	r.DELETE("/ticket/:id")
+	tickets := rg.Group("/tickets")
+	{
+		tickets.GET("", handler.GetTicketPreviews)
+		tickets.GET("/:id", handler.GetTicketById)
+		tickets.POST("", handler.MakeTicket)
+		tickets.PUT("/:id")
+		tickets.DELETE("/:id")
+	}
 }
 
 func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
@@ -29,8 +34,8 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	if err != nil {
 		var appErr common.AppError
 		switch appErr.Code {
-		case errors.ErrNotFound:
-			c.JSON(http.StatusNotFound, response.Error(
+		case common.ErrNotFound:
+			c.JSON(http.StatusNotFound, common.Error(
 				http.StatusNotFound,
 				appErr.Message,
 			))
@@ -38,5 +43,97 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, previews)
+	c.JSON(http.StatusOK, common.Success(
+		http.StatusOK,
+		"티켓 목록 불러오기에 성공했습니다",
+		previews,
+	))
+}
+
+func (h *TicketHandler) GetTicketById(c *gin.Context) {
+	id := c.Param("id")
+	ticket, err := h.ticketUseCase.GetTicketByID(id)
+
+	if err != nil {
+		var appErr common.AppError
+		switch appErr.Code {
+		case common.ErrNotFound:
+			c.JSON(http.StatusNotFound, common.Error(
+				http.StatusNotFound,
+				appErr.Message,
+			))
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"티켓 불러오기에 실패했습니다",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, common.Success(
+		http.StatusOK,
+		"티켓 불러오기에 성공했습니다",
+		ticket,
+	))
+}
+
+func (h *TicketHandler) MakeTicket(c *gin.Context) {
+	var req dto.TicketDTO
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"누락된 필드가 있습니다",
+		))
+		return
+	}
+
+	if req.BackgroundColor == "" {
+		req.BackgroundColor = "0xffFFFF"
+	}
+	if req.ForegroundColor == "" {
+		req.ForegroundColor = "0xff000000"
+	}
+
+	ticket := &models.Ticket{
+		Image:           req.Image,
+		Title:           req.Title,
+		Location:        req.Location,
+		Datetime:        req.Datetime,
+		BackgroundColor: req.BackgroundColor,
+		ForegroundColor: req.ForegroundColor,
+		Fields:          make([]models.Field, len(req.Fields)),
+	}
+
+	for i, v := range req.Fields {
+		ticket.Fields[i] = models.Field{
+			Subtitle: v.Subtitle,
+			Content:  v.Content,
+		}
+	}
+
+	id, err := h.ticketUseCase.CreateTicket(ticket)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"티켓 생성에 실패했습니다",
+		))
+		return
+	}
+
+	res := &dto.TicketResponseDTO{
+		Id:              id,
+		Image:           ticket.Image,
+		Title:           ticket.Title,
+		Location:        ticket.Location,
+		Datetime:        ticket.Datetime,
+		BackgroundColor: ticket.BackgroundColor,
+		ForegroundColor: ticket.ForegroundColor,
+		Fields:          make([]dto.Field, len(ticket.Fields)),
+	}
+
+	c.JSON(http.StatusCreated, common.Success(
+		http.StatusCreated,
+		"티켓이 생성되었습니다",
+		res,
+	))
 }

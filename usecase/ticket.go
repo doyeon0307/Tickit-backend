@@ -24,7 +24,7 @@ func (u ticketUsecase) GetTicketByID(id string) (*models.Ticket, error) {
 	return u.ticketRepo.GetById(context.Background(), id)
 }
 
-func (u ticketUsecase) CreateTicket(ticket *models.Ticket) error {
+func (u ticketUsecase) CreateTicket(ticket *models.Ticket) (string, error) {
 	return u.ticketRepo.Create(context.Background(), ticket)
 }
 

@@ -22,6 +22,8 @@ func NewTicketRepository(db *mongo.Database) domain.TicketRepository {
 }
 
 func (m *ticketRepository) GetPreviews(ctx context.Context) ([]*models.TicketPreview, error) {
+	previews := make([]*models.TicketPreview, 0)
+
 	opts := options.Find().SetProjection(bson.M{
 		"_id":   1,
 		"image": 1,
@@ -33,12 +35,15 @@ func (m *ticketRepository) GetPreviews(ctx context.Context) ([]*models.TicketPre
 	}
 	defer cursor.Close(ctx)
 
-	var tickets []*models.TicketPreview
-	if err = cursor.All(ctx, &tickets); err != nil {
+	if err = cursor.All(ctx, &previews); err != nil {
 		return nil, err
 	}
 
-	return tickets, nil
+	if previews == nil {
+		previews = make([]*models.TicketPreview, 0)
+	}
+
+	return previews, nil
 }
 
 func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Ticket, error) {
@@ -59,14 +64,14 @@ func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Tick
 	return &ticket, nil
 }
 
-func (m *ticketRepository) Create(ctx context.Context, ticket *models.Ticket) error {
+func (m *ticketRepository) Create(ctx context.Context, ticket *models.Ticket) (string, error) {
 	result, err := m.collection.InsertOne(ctx, ticket)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	ticket.Id = result.InsertedID.(primitive.ObjectID).Hex()
-	return nil
+	return ticket.Id, nil
 }
 
 func (m *ticketRepository) Update(ctx context.Context, id string, ticket *models.Ticket) error {

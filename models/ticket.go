@@ -12,8 +12,8 @@ type Ticket struct {
 }
 
 type Field struct {
-	Key   string `json:"key" bson:"key"`
-	Value string `json:"value" bson:"value"`
+	Subtitle string `json:"subtitle" bson:"subtitle"`
+	Content  string `json:"content" bson:"content"`
 }
 
 type TicketPreview struct {
