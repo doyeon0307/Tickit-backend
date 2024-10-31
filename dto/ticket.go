@@ -25,3 +25,14 @@ type TicketResponseDTO struct {
 	ForegroundColor string  `json:"foregroundColor"`
 	Fields          []Field `json:"fields"`
 }
+
+type TicketUpdateDTO struct {
+	Id              string  `json:"id"`
+	Image           string  `json:"image"`
+	Title           string  `json:"title"`
+	Location        string  `json:"location"`
+	Datetime        string  `json:"datetime"`
+	BackgroundColor string  `json:"backgroundColor"`
+	ForegroundColor string  `json:"foregroundColor"`
+	Fields          []Field `json:"fields"`
+}

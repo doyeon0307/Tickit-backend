@@ -56,7 +56,7 @@ func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Tick
 	err = m.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&ticket)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, nil
+			return nil, err
 		}
 		return nil, err
 	}

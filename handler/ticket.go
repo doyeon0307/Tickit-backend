@@ -24,8 +24,8 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 		tickets.GET("", handler.GetTicketPreviews)
 		tickets.GET("/:id", handler.GetTicketById)
 		tickets.POST("", handler.MakeTicket)
-		tickets.PUT("/:id")
-		tickets.DELETE("/:id")
+		tickets.PUT("/:id", handler.UpdateTicket)
+		tickets.DELETE("/:id", handler.DeleteTicket)
 	}
 }
 
@@ -82,7 +82,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
-			"누락된 필드가 있습니다",
+			"Request Body가 올바르지 않습니다",
 		))
 		return
 	}
@@ -135,5 +135,106 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 		http.StatusCreated,
 		"티켓이 생성되었습니다",
 		res,
+	))
+}
+
+func (h *TicketHandler) UpdateTicket(c *gin.Context) {
+	id := c.Param("id")
+	_, err := h.ticketUseCase.GetTicketByID(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, common.Error(
+			http.StatusNotFound,
+			"유효하지 않은 아이디입니다",
+		))
+		return
+	}
+
+	var req dto.TicketUpdateDTO
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"Request Body가 올바르지 않습니다",
+		))
+		return
+	}
+
+	ticket := &models.Ticket{
+		Image:           req.Image,
+		Title:           req.Title,
+		Location:        req.Location,
+		Datetime:        req.Datetime,
+		BackgroundColor: req.BackgroundColor,
+		ForegroundColor: req.ForegroundColor,
+		Fields:          make([]models.Field, len(req.Fields)),
+	}
+
+	for i, v := range req.Fields {
+		ticket.Fields[i] = models.Field{
+			Subtitle: v.Subtitle,
+			Content:  v.Content,
+		}
+	}
+
+	result := h.ticketUseCase.UpdateTicket(id, ticket)
+	if result != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"티켓 수정에 실패했습니다",
+		))
+		return
+	}
+
+	res := &dto.TicketResponseDTO{
+		Id:              id,
+		Image:           ticket.Image,
+		Title:           ticket.Title,
+		Location:        ticket.Location,
+		Datetime:        ticket.Datetime,
+		BackgroundColor: ticket.BackgroundColor,
+		ForegroundColor: ticket.ForegroundColor,
+		Fields:          make([]dto.Field, len(ticket.Fields)),
+	}
+
+	c.JSON(http.StatusAccepted, common.Success(
+		http.StatusAccepted,
+		"티켓이 수정되었습니다",
+		res,
+	))
+}
+
+func (h *TicketHandler) DeleteTicket(c *gin.Context) {
+	id := c.Param("id")
+
+	if _, err := h.ticketUseCase.GetTicketByID(id); err != nil {
+		var appErr common.AppError
+		switch appErr.Code {
+		case common.ErrNotFound:
+			c.JSON(http.StatusNotFound, common.Error(
+				http.StatusNotFound,
+				"이미 삭제된 티켓입니다",
+			))
+		default:
+			c.JSON(http.StatusInternalServerError, common.Error(
+				http.StatusInternalServerError,
+				"티켓 조회에 실패했습니다. 아이디를 확인해주세요.",
+			))
+		}
+		return
+	}
+
+	err := h.ticketUseCase.DeleteTicket(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"티켓 삭제에 실패했습니다",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, common.Success(
+		http.StatusOK,
+		"티켓이 삭제되었습니다",
+		id,
 	))
 }
