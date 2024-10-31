@@ -32,15 +32,17 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	previews, err := h.ticketUseCase.GetTicketPreviews()
 	if err != nil {
-		var appErr common.AppError
-		switch appErr.Code {
-		case common.ErrNotFound:
-			c.JSON(http.StatusNotFound, common.Error(
-				http.StatusNotFound,
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
 				appErr.Message,
 			))
+			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"티켓 목록 불러오기에 실패했습니다",
+		))
 		return
 	}
 	c.JSON(http.StatusOK, common.Success(
@@ -55,13 +57,12 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	ticket, err := h.ticketUseCase.GetTicketByID(id)
 
 	if err != nil {
-		var appErr common.AppError
-		switch appErr.Code {
-		case common.ErrNotFound:
-			c.JSON(http.StatusNotFound, common.Error(
-				http.StatusNotFound,
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
 				appErr.Message,
 			))
+			return
 		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
@@ -82,7 +83,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
-			"Request Body가 올바르지 않습니다",
+			"Request Body가 잘못되었습니다",
 		))
 		return
 	}
@@ -113,6 +114,13 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 
 	id, err := h.ticketUseCase.CreateTicket(ticket)
 	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
 			"티켓 생성에 실패했습니다",
@@ -140,12 +148,18 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 
 func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	id := c.Param("id")
-	_, err := h.ticketUseCase.GetTicketByID(id)
 
-	if err != nil {
+	if _, err := h.ticketUseCase.GetTicketByID(id); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
 		c.JSON(http.StatusNotFound, common.Error(
 			http.StatusNotFound,
-			"유효하지 않은 아이디입니다",
+			"티켓 조회에 실패했습니다. 아이디를 확인해주세요.",
 		))
 		return
 	}
@@ -177,8 +191,15 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 		}
 	}
 
-	result := h.ticketUseCase.UpdateTicket(id, ticket)
-	if result != nil {
+	err := h.ticketUseCase.UpdateTicket(id, ticket)
+	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
 			"티켓 수정에 실패했습니다",
@@ -208,24 +229,29 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 	id := c.Param("id")
 
 	if _, err := h.ticketUseCase.GetTicketByID(id); err != nil {
-		var appErr common.AppError
-		switch appErr.Code {
-		case common.ErrNotFound:
-			c.JSON(http.StatusNotFound, common.Error(
-				http.StatusNotFound,
-				"이미 삭제된 티켓입니다",
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
 			))
-		default:
-			c.JSON(http.StatusInternalServerError, common.Error(
-				http.StatusInternalServerError,
-				"티켓 조회에 실패했습니다. 아이디를 확인해주세요.",
-			))
+			return
 		}
+		c.JSON(http.StatusNotFound, common.Error(
+			http.StatusNotFound,
+			"티켓 조회에 실패했습니다. 아이디를 확인해주세요.",
+		))
 		return
 	}
 
 	err := h.ticketUseCase.DeleteTicket(id)
 	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
 			"티켓 삭제에 실패했습니다",
