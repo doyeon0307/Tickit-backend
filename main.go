@@ -2,13 +2,11 @@ package main
 
 import (
 	"log"
-	"net/http"
-	"std/github.com/dodo/Tickit-backend/config"
-	"std/github.com/dodo/Tickit-backend/repository"
-	"std/github.com/dodo/Tickit-backend/routes"
-	"std/github.com/dodo/Tickit-backend/usecase"
 
-	"github.com/gin-gonic/gin"
+	"github.com/doyeon0307/tickit-backend/config"
+	"github.com/doyeon0307/tickit-backend/repository"
+	"github.com/doyeon0307/tickit-backend/routes"
+	"github.com/doyeon0307/tickit-backend/usecase"
 )
 
 func main() {
@@ -25,12 +23,6 @@ func main() {
 	}
 
 	router := routes.SetupRouter(handlers)
-
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "hello world",
-		})
-	})
 
 	router.Run(":7000")
 }

@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"context"
-	"std/github.com/dodo/Tickit-backend/domain"
-	"std/github.com/dodo/Tickit-backend/models"
+
+	"github.com/doyeon0307/tickit-backend/domain"
+	"github.com/doyeon0307/tickit-backend/models"
 )
 
 type ticketUsecase struct {

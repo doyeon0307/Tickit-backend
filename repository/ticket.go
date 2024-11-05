@@ -2,9 +2,10 @@ package repository
 
 import (
 	"context"
-	"std/github.com/dodo/Tickit-backend/common"
-	"std/github.com/dodo/Tickit-backend/domain"
-	"std/github.com/dodo/Tickit-backend/models"
+
+	"github.com/doyeon0307/tickit-backend/common"
+	"github.com/doyeon0307/tickit-backend/domain"
+	"github.com/doyeon0307/tickit-backend/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -16,8 +16,10 @@ func ConnectDB() (*mongo.Database, error) {
 		return nil, err
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(5000)*time.Second)
-	err = client.Connect(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5000)*time.Second)
+	defer cancel()
+
+	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, err
 	}

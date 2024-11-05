@@ -2,10 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"std/github.com/dodo/Tickit-backend/common"
-	"std/github.com/dodo/Tickit-backend/domain"
-	"std/github.com/dodo/Tickit-backend/dto"
-	"std/github.com/dodo/Tickit-backend/models"
+
+	"github.com/doyeon0307/tickit-backend/common"
+	"github.com/doyeon0307/tickit-backend/domain"
+	"github.com/doyeon0307/tickit-backend/dto"
+	"github.com/doyeon0307/tickit-backend/models"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,7 +2,8 @@ package domain
 
 import (
 	"context"
-	"std/github.com/dodo/Tickit-backend/models"
+
+	"github.com/doyeon0307/tickit-backend/models"
 )
 
 type TicketRepository interface {
