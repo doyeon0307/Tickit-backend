@@ -245,13 +245,6 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 
 	err := h.ticketUseCase.DeleteTicket(id)
 	if err != nil {
-		if appErr, ok := err.(*common.AppError); ok {
-			c.JSON(appErr.Code.StatusCode(), common.Error(
-				appErr.Code.StatusCode(),
-				appErr.Message,
-			))
-			return
-		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
 			"티켓 삭제에 실패했습니다",
