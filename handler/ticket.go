@@ -2,10 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"std/github.com/dodo/Tickit-backend/common"
-	"std/github.com/dodo/Tickit-backend/domain"
-	"std/github.com/dodo/Tickit-backend/dto"
-	"std/github.com/dodo/Tickit-backend/models"
+
+	"github.com/doyeon0307/tickit-backend/common"
+	"github.com/doyeon0307/tickit-backend/domain"
+	"github.com/doyeon0307/tickit-backend/dto"
+	"github.com/doyeon0307/tickit-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -245,13 +246,6 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 
 	err := h.ticketUseCase.DeleteTicket(id)
 	if err != nil {
-		if appErr, ok := err.(*common.AppError); ok {
-			c.JSON(appErr.Code.StatusCode(), common.Error(
-				appErr.Code.StatusCode(),
-				appErr.Message,
-			))
-			return
-		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
 			"티켓 삭제에 실패했습니다",

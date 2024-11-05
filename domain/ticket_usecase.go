@@ -1,6 +1,6 @@
 package domain
 
-import "std/github.com/dodo/Tickit-backend/models"
+import "github.com/doyeon0307/tickit-backend/models"
 
 type TicketUsecase interface {
 	GetTicketPreviews() ([]*models.TicketPreview, error)
