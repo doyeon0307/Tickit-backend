@@ -9,6 +9,10 @@ import (
 	"github.com/doyeon0307/tickit-backend/usecase"
 )
 
+// @title Tickit!
+// @version 1.0
+// @description 소중한 기억을 나만의 티켓북에 기록하세요
+// @host localhost:7000
 func main() {
 	db, _ := config.ConnectDB()
 	if db == nil {
