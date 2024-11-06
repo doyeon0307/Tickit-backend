@@ -1,4 +1,227 @@
+definitions:
+  common.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  dto.Field:
+    properties:
+      content:
+        type: string
+      subtitle:
+        type: string
+    type: object
+  dto.TicketDTO:
+    properties:
+      backgroundColor:
+        type: string
+      datetime:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/dto.Field'
+        type: array
+      foregroundColor:
+        type: string
+      image:
+        type: string
+      location:
+        type: string
+      title:
+        type: string
+    required:
+    - datetime
+    - image
+    - location
+    - title
+    type: object
+  dto.TicketUpdateDTO:
+    properties:
+      backgroundColor:
+        type: string
+      datetime:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/dto.Field'
+        type: array
+      foregroundColor:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      location:
+        type: string
+      title:
+        type: string
+    type: object
+  models.Field:
+    properties:
+      content:
+        type: string
+      subtitle:
+        type: string
+    type: object
+  models.Ticket:
+    properties:
+      backgroundColor:
+        type: string
+      datetime:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/models.Field'
+        type: array
+      foregroundColor:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      location:
+        type: string
+      title:
+        type: string
+    type: object
+  models.TicketPreview:
+    properties:
+      id:
+        type: string
+      image:
+        type: string
+    type: object
+host: localhost:7000
 info:
   contact: {}
-paths: {}
+  description: 소중한 기억을 나만의 티켓북에 기록하세요
+  title: Tickit!
+  version: "1.0"
+paths:
+  /api/tickets:
+    get:
+      consumes:
+      - application/json
+      description: 홈 화면에 작성한 티켓 목록을 불러옵니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TicketPreview'
+              type: object
+      summary: 티켓 목록 불러오기
+      tags:
+      - Tickets
+    post:
+      consumes:
+      - application/json
+      description: 티켓을 생성합니다
+      parameters:
+      - description: 생성할 티켓 DTO
+        in: body
+        name: ticketDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Ticket'
+              type: object
+      summary: 티켓 생성하기
+      tags:
+      - Tickets
+  /api/tickets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 티켓을 삭제합니다
+      parameters:
+      - description: 티켓 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 티켓 삭제하기
+      tags:
+      - Tickets
+    get:
+      consumes:
+      - application/json
+      description: 티켓 아이디로 세부정보를 불러옵니다
+      parameters:
+      - description: 티켓 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Ticket'
+              type: object
+      summary: 티켓 세부정보 불러오기
+      tags:
+      - Tickets
+    put:
+      consumes:
+      - application/json
+      description: 티켓을 수정합니다
+      parameters:
+      - description: 티켓 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 수정된 티켓 DTO
+        in: body
+        name: ticketDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Ticket'
+              type: object
+      summary: 티켓 수정하기
+      tags:
+      - Tickets
 swagger: "2.0"

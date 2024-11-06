@@ -30,6 +30,13 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 	}
 }
 
+// @Tags Tickets
+// @Summary 티켓 목록 불러오기
+// @Description 홈 화면에 작성한 티켓 목록을 불러옵니다
+// @Accept json
+// @Produce json
+// @Success 200 {object} common.Response{data=models.TicketPreview}
+// @Router /api/tickets [get]
 func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	previews, err := h.ticketUseCase.GetTicketPreviews()
 	if err != nil {
@@ -53,6 +60,14 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	))
 }
 
+// @Tags Tickets
+// @Summary 티켓 세부정보 불러오기
+// @Description 티켓 아이디로 세부정보를 불러옵니다
+// @Accept json
+// @Produce json
+// @Param id path string true "티켓 ID"
+// @Success 200 {object} common.Response{data=models.Ticket}
+// @Router /api/tickets/{id} [get]
 func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	id := c.Param("id")
 	ticket, err := h.ticketUseCase.GetTicketByID(id)
@@ -78,6 +93,14 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	))
 }
 
+// @Tags Tickets
+// @Summary 티켓 생성하기
+// @Description 티켓을 생성합니다
+// @Accept json
+// @Produce json
+// @Param ticketDTO body dto.TicketDTO true "생성할 티켓 DTO"
+// @Success 200 {object} common.Response{data=models.Ticket}
+// @Router /api/tickets [post]
 func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	var req dto.TicketDTO
 
@@ -147,6 +170,15 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	))
 }
 
+// @Tags Tickets
+// @Summary 티켓 수정하기
+// @Description 티켓을 수정합니다
+// @Accept json
+// @Produce json
+// @Param id path string true "티켓 ID"
+// @Param ticketDTO body dto.TicketUpdateDTO true "수정된 티켓 DTO"
+// @Success 200 {object} common.Response{data=models.Ticket}
+// @Router /api/tickets/{id} [put]
 func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	id := c.Param("id")
 
@@ -226,6 +258,14 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	))
 }
 
+// @Tags Tickets
+// @Summary 티켓 삭제하기
+// @Description 티켓을 삭제합니다
+// @Accept json
+// @Produce json
+// @Param id path string true "티켓 ID"
+// @Success 200 {object} common.Response
+// @Router /api/tickets/{id} [delete]
 func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 	id := c.Param("id")
 
