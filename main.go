@@ -14,8 +14,18 @@ import (
 // @description 소중한 기억을 나만의 티켓북에 기록하세요
 // @host localhost:7000
 func main() {
-	db, _ := config.ConnectDB()
-	if db == nil {
+	s3Config, err := config.NewS3Config(
+		config.AwsAccessKey,
+		config.AwsSecretKey,
+		"us-east-1",
+		"tickit-s3-bucket",
+	)
+	if err != nil {
+		log.Fatal("S3 연결에 실패했습니다")
+	}
+
+	db, err := config.ConnectDB()
+	if err != nil {
 		log.Fatal("데이터베이스 연결에 실패했습니다")
 	}
 
@@ -24,6 +34,7 @@ func main() {
 
 	handlers := routes.HandlerContainer{
 		TicketUsecase: ticketUseCase,
+		S3Config:      *s3Config,
 	}
 
 	router := routes.SetupRouter(handlers)

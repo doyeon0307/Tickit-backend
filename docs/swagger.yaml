@@ -224,4 +224,19 @@ paths:
       summary: 티켓 수정하기
       tags:
       - Tickets
+  /api/tickets/presigned-url:
+    get:
+      consumes:
+      - application/json
+      description: Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: Presigend URL 불러오기
+      tags:
+      - Tickets
 swagger: "2.0"

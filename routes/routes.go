@@ -12,6 +12,7 @@ import (
 
 type HandlerContainer struct {
 	TicketUsecase domain.TicketUsecase
+	S3Config      config.S3Config
 }
 
 func SetupRouter(handlers HandlerContainer) *gin.Engine {
@@ -28,8 +29,7 @@ func SetupRouter(handlers HandlerContainer) *gin.Engine {
 	v1 := router.Group("/api")
 	{
 		v1.GET("/health", healthCheck)
-
-		handler.NewTicketHandler(v1, handlers.TicketUsecase)
+		handler.NewTicketHandler(v1, handlers.TicketUsecase, &handlers.S3Config)
 	}
 
 	return router

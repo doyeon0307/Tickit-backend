@@ -4,22 +4,25 @@ import (
 	"net/http"
 
 	"github.com/doyeon0307/tickit-backend/common"
+	"github.com/doyeon0307/tickit-backend/config"
 	"github.com/doyeon0307/tickit-backend/domain"
 	"github.com/doyeon0307/tickit-backend/dto"
 	"github.com/doyeon0307/tickit-backend/models"
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TicketHandler struct {
 	ticketUseCase domain.TicketUsecase
+	s3Config      *config.S3Config
 }
 
-func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
+func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase, s3Config *config.S3Config) {
 	handler := &TicketHandler{
 		ticketUseCase: usecase,
+		s3Config:      s3Config,
 	}
-
 	tickets := rg.Group("/tickets")
 	{
 		tickets.GET("", handler.GetTicketPreviews)
@@ -27,6 +30,7 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 		tickets.POST("", handler.MakeTicket)
 		tickets.PUT("/:id", handler.UpdateTicket)
 		tickets.DELETE("/:id", handler.DeleteTicket)
+		tickets.GET("/presigned-url", handler.GetPresignedUrl)
 	}
 }
 
@@ -296,5 +300,30 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 		http.StatusOK,
 		"티켓이 삭제되었습니다",
 		id,
+	))
+}
+
+// @Tags Tickets
+// @Summary Presigend URL 불러오기
+// @Description Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다
+// @Accept json
+// @Produce json
+// @Success 200 {object} common.Response
+// @Router /api/tickets/presigned-url [get]
+func (h *TicketHandler) GetPresignedUrl(c *gin.Context) {
+	key := uuid.New().String()
+
+	url, err := h.s3Config.MakePresignURL(key)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"URL 생성에 실패했습니다",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, common.Success(
+		http.StatusOK,
+		"URL 생성에 성공했습니다",
+		url,
 	))
 }
