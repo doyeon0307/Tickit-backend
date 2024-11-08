@@ -14,6 +14,85 @@ definitions:
       subtitle:
         type: string
     type: object
+  dto.ScheduleCalendarPreviewDTO:
+    properties:
+      date:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ScheduleDTO:
+    properties:
+      casting:
+        type: string
+      company:
+        type: string
+      date:
+        type: string
+      image:
+        type: string
+      link:
+        type: string
+      location:
+        type: string
+      memo:
+        type: string
+      number:
+        type: integer
+      seat:
+        type: string
+      thumbmail:
+        type: boolean
+      time:
+        type: string
+      title:
+        type: string
+    required:
+    - date
+    - title
+    type: object
+  dto.ScheduleResponseDTO:
+    properties:
+      casting:
+        type: string
+      company:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      link:
+        type: string
+      location:
+        type: string
+      memo:
+        type: string
+      number:
+        type: integer
+      seat:
+        type: string
+      thumbmail:
+        type: boolean
+      time:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ScheduleTicketPreviewDTO:
+    properties:
+      date:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
   dto.TicketDTO:
     properties:
       backgroundColor:
@@ -101,6 +180,165 @@ info:
   title: Tickit!
   version: "1.0"
 paths:
+  /api/schedules:
+    get:
+      consumes:
+      - application/json
+      description: 시작 날짜와 종료 날짜 사이의 일정 목록을 불러옵니다
+      parameters:
+      - description: 시작 날짜
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: 종료 날짜
+        in: query
+        name: endDate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScheduleCalendarPreviewDTO'
+              type: object
+      summary: 달력에 일정 목록 불러오기
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: 일정을 생성합니다
+      parameters:
+      - description: 일정 DTO
+        in: body
+        name: scheduleDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ScheduleDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScheduleResponseDTO'
+              type: object
+      summary: 일정 생성하기
+      tags:
+      - Schedules
+  /api/schedules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 일정을 삭제합니다
+      parameters:
+      - description: 일정 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 일정 삭제하기
+      tags:
+      - Schedules
+    get:
+      consumes:
+      - application/json
+      description: 세부 일정을 불러옵니다
+      parameters:
+      - description: 일정 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScheduleResponseDTO'
+              type: object
+      summary: 세부 일정 불러오기
+      tags:
+      - Schedules
+    put:
+      consumes:
+      - application/json
+      description: 일정을 수정합니다
+      parameters:
+      - description: 일정 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 일정 DTO
+        in: body
+        name: scheduleDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ScheduleDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScheduleResponseDTO'
+              type: object
+      summary: 일정 수정하기
+      tags:
+      - Schedules
+  /api/schedules/for-ticket:
+    get:
+      consumes:
+      - application/json
+      description: 현 날짜 이전의 일정 목록을 불러옵니다. 티켓 생성 화면의'일정 불러오기' 버튼에서 사용됩니다.
+      parameters:
+      - description: 오늘 날짜
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScheduleTicketPreviewDTO'
+              type: object
+      summary: 티켓 생성 가능한 일정 목록 불러오기
+      tags:
+      - Schedules
   /api/tickets:
     get:
       consumes:

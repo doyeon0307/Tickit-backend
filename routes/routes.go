@@ -11,8 +11,9 @@ import (
 )
 
 type HandlerContainer struct {
-	TicketUsecase domain.TicketUsecase
-	S3Config      config.S3Config
+	TicketUsecase   domain.TicketUsecase
+	ScheduleUsecase domain.ScheduleUsecase
+	S3Config        config.S3Config
 }
 
 func SetupRouter(handlers HandlerContainer) *gin.Engine {
@@ -30,6 +31,7 @@ func SetupRouter(handlers HandlerContainer) *gin.Engine {
 	{
 		v1.GET("/health", healthCheck)
 		handler.NewTicketHandler(v1, handlers.TicketUsecase, &handlers.S3Config)
+		handler.NewScheduleHandler(v1, handlers.ScheduleUsecase)
 	}
 
 	return router

@@ -30,11 +30,15 @@ func main() {
 	}
 
 	ticketRepo := repository.NewTicketRepository(db)
-	ticketUseCase := usecase.NewTicketUseCase(ticketRepo)
+	ticketUsecase := usecase.NewTicketUseCase(ticketRepo)
+
+	scheduleRepo := repository.NewScheduleRepository(db)
+	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo)
 
 	handlers := routes.HandlerContainer{
-		TicketUsecase: ticketUseCase,
-		S3Config:      *s3Config,
+		TicketUsecase:   ticketUsecase,
+		ScheduleUsecase: scheduleUsecase,
+		S3Config:        *s3Config,
 	}
 
 	router := routes.SetupRouter(handlers)
