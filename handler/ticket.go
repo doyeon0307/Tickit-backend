@@ -14,13 +14,13 @@ import (
 )
 
 type TicketHandler struct {
-	ticketUseCase domain.TicketUsecase
+	ticketUsecase domain.TicketUsecase
 	s3Config      *config.S3Config
 }
 
 func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase, s3Config *config.S3Config) {
 	handler := &TicketHandler{
-		ticketUseCase: usecase,
+		ticketUsecase: usecase,
 		s3Config:      s3Config,
 	}
 	tickets := rg.Group("/tickets")
@@ -42,7 +42,7 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase, s3Confi
 // @Success 200 {object} common.Response{data=models.TicketPreview}
 // @Router /api/tickets [get]
 func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
-	previews, err := h.ticketUseCase.GetTicketPreviews()
+	previews, err := h.ticketUsecase.GetTicketPreviews()
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -74,7 +74,7 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 // @Router /api/tickets/{id} [get]
 func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	id := c.Param("id")
-	ticket, err := h.ticketUseCase.GetTicketByID(id)
+	ticket, err := h.ticketUsecase.GetTicketByID(id)
 
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
@@ -140,7 +140,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 		}
 	}
 
-	id, err := h.ticketUseCase.CreateTicket(ticket)
+	id, err := h.ticketUsecase.CreateTicket(ticket)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -186,7 +186,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	id := c.Param("id")
 
-	if _, err := h.ticketUseCase.GetTicketByID(id); err != nil {
+	if _, err := h.ticketUsecase.GetTicketByID(id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -228,7 +228,7 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 		}
 	}
 
-	err := h.ticketUseCase.UpdateTicket(id, ticket)
+	err := h.ticketUsecase.UpdateTicket(id, ticket)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -273,7 +273,7 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 	id := c.Param("id")
 
-	if _, err := h.ticketUseCase.GetTicketByID(id); err != nil {
+	if _, err := h.ticketUsecase.GetTicketByID(id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -288,7 +288,7 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 		return
 	}
 
-	err := h.ticketUseCase.DeleteTicket(id)
+	err := h.ticketUsecase.DeleteTicket(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
