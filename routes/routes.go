@@ -30,8 +30,9 @@ func SetupRouter(handlers HandlerContainer) *gin.Engine {
 	v1 := router.Group("/api")
 	{
 		v1.GET("/health", healthCheck)
-		handler.NewTicketHandler(v1, handlers.TicketUsecase, &handlers.S3Config)
+		handler.NewTicketHandler(v1, handlers.TicketUsecase)
 		handler.NewScheduleHandler(v1, handlers.ScheduleUsecase)
+		handler.NewS3Handler(v1, &handlers.S3Config)
 	}
 
 	return router

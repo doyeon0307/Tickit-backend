@@ -8,7 +8,6 @@ import (
 	"github.com/doyeon0307/tickit-backend/domain"
 	"github.com/doyeon0307/tickit-backend/dto"
 	"github.com/doyeon0307/tickit-backend/models"
-	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,10 +17,9 @@ type TicketHandler struct {
 	s3Config      *config.S3Config
 }
 
-func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase, s3Config *config.S3Config) {
+func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 	handler := &TicketHandler{
 		ticketUsecase: usecase,
-		s3Config:      s3Config,
 	}
 	tickets := rg.Group("/tickets")
 	{
@@ -30,7 +28,6 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase, s3Confi
 		tickets.POST("", handler.MakeTicket)
 		tickets.PUT("/:id", handler.UpdateTicket)
 		tickets.DELETE("/:id", handler.DeleteTicket)
-		tickets.GET("/presigned-url", handler.GetPresignedUrl)
 	}
 }
 
@@ -99,7 +96,7 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 
 // @Tags Tickets
 // @Summary 티켓 생성하기
-// @Description 티켓을 생성합니다
+// @Description 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param ticketDTO body dto.TicketDTO true "생성할 티켓 DTO"
@@ -176,7 +173,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 
 // @Tags Tickets
 // @Summary 티켓 수정하기
-// @Description 티켓을 수정합니다
+// @Description 티켓을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param id path string true "티켓 ID"
@@ -300,30 +297,5 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 		http.StatusOK,
 		"티켓이 삭제되었습니다",
 		id,
-	))
-}
-
-// @Tags Tickets
-// @Summary Presigend URL 불러오기
-// @Description Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다
-// @Accept json
-// @Produce json
-// @Success 200 {object} common.Response
-// @Router /api/tickets/presigned-url [get]
-func (h *TicketHandler) GetPresignedUrl(c *gin.Context) {
-	key := uuid.New().String()
-
-	url, err := h.s3Config.MakePresignURL(key)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"URL 생성에 실패했습니다",
-		))
-		return
-	}
-	c.JSON(http.StatusOK, common.Success(
-		http.StatusOK,
-		"URL 생성에 성공했습니다",
-		url,
 	))
 }
