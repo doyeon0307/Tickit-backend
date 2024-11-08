@@ -15,6 +15,29 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/s3/presigned-url": {
+            "get": {
+                "description": "Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "S3"
+                ],
+                "summary": "Presigend URL 불러오기",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/schedules": {
             "get": {
                 "description": "시작 날짜와 종료 날짜 사이의 일정 목록을 불러옵니다",
@@ -352,29 +375,6 @@ const docTemplate = `{
                                     }
                                 }
                             ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tickets/presigned-url": {
-            "get": {
-                "description": "Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tickets"
-                ],
-                "summary": "Presigend URL 불러오기",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
                         }
                     }
                 }
