@@ -165,7 +165,7 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 
 // @Tags Schedules
 // @Summary 일정 생성하기
-// @Description 일정을 생성합니다
+// @Description 일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param scheduleDTO body dto.ScheduleDTO true "일정 DTO"
@@ -204,7 +204,7 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 
 // @Tags Schedules
 // @Summary 일정 수정하기
-// @Description 일정을 수정합니다
+// @Description 일정을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param id path string true "일정 ID"

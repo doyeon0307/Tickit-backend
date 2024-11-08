@@ -89,7 +89,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "일정을 생성합니다",
+                "description": "일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -220,7 +220,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "일정을 수정합니다",
+                "description": "일정을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -336,7 +336,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "티켓을 생성합니다",
+                "description": "티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -424,7 +424,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "티켓을 수정합니다",
+                "description": "티켓을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
                 ],

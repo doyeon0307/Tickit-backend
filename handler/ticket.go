@@ -96,7 +96,7 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 
 // @Tags Tickets
 // @Summary 티켓 생성하기
-// @Description 티켓을 생성합니다
+// @Description 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param ticketDTO body dto.TicketDTO true "생성할 티켓 DTO"
@@ -173,7 +173,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 
 // @Tags Tickets
 // @Summary 티켓 수정하기
-// @Description 티켓을 수정합니다
+// @Description 티켓을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
 // @Accept json
 // @Produce json
 // @Param id path string true "티켓 ID"
