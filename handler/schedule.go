@@ -38,6 +38,7 @@ func NewScheduleHandler(rg *gin.RouterGroup, usecase domain.ScheduleUsecase) {
 // @Success 200 {object} common.Response{data=dto.ScheduleTicketPreviewDTO}
 // @Router /api/schedules/for-ticket [get]
 func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
+	userId, _ := c.Get("userId")
 	date := c.Query("date")
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
@@ -51,7 +52,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
 			return
 		}
 	}
-	previews, err := h.scheduleUsecase.GetSchedulePreviewsForTicket(date)
+	previews, err := h.scheduleUsecase.GetSchedulePreviewsForTicket(userId.(string), date)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -83,6 +84,8 @@ func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleCalendarPreviewDTO}
 // @Router /api/schedules [get]
 func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	startDate := c.Query("startDate")
 	endDate := c.Query("endDate")
 
@@ -102,7 +105,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
 		return
 	}
 
-	previews, err := h.scheduleUsecase.GetSchedulePreviewsForCalendar(startDate, endDate)
+	previews, err := h.scheduleUsecase.GetSchedulePreviewsForCalendar(userId.(string), startDate, endDate)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -133,6 +136,8 @@ func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules/{id} [get]
 func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -141,7 +146,7 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 		))
 	}
 
-	schedule, err := h.scheduleUsecase.GetScheduleById(id)
+	schedule, err := h.scheduleUsecase.GetScheduleById(userId.(string), id)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -172,6 +177,8 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules [post]
 func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	var schedule dto.ScheduleDTO
 	if err := c.ShouldBindJSON(&schedule); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -180,7 +187,7 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 		))
 		return
 	}
-	resp, err := h.scheduleUsecase.CreateSchedule(&schedule)
+	resp, err := h.scheduleUsecase.CreateSchedule(userId.(string), &schedule)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -212,6 +219,8 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules/{id} [put]
 func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	var schedule dto.ScheduleResponseDTO
 
@@ -222,7 +231,7 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 		))
 	}
 
-	if _, err := h.scheduleUsecase.GetScheduleById(id); err != nil {
+	if _, err := h.scheduleUsecase.GetScheduleById(userId.(string), id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -245,7 +254,7 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.scheduleUsecase.UpdateSchedule(id, &schedule)
+	resp, err := h.scheduleUsecase.UpdateSchedule(userId.(string), id, &schedule)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -276,6 +285,8 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/schedules/{id} [delete]
 func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -284,7 +295,7 @@ func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
 		))
 	}
 
-	if _, err := h.scheduleUsecase.GetScheduleById(id); err != nil {
+	if _, err := h.scheduleUsecase.GetScheduleById(userId.(string), id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -299,7 +310,7 @@ func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
 		return
 	}
 
-	err := h.scheduleUsecase.DeleteSchedule(id)
+	err := h.scheduleUsecase.DeleteSchedule(userId.(string), id)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(

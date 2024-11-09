@@ -33,10 +33,8 @@ func SetupRouter(handlers HandlerContainer) *gin.Engine {
 	{
 		v1.GET("/health", healthCheck)
 
-		// 인증이 필요없는 Auth 관련 라우트
 		handler.NewUserHandler(v1, handlers.UserUsecase)
 
-		// 인증이 필요한 라우트들
 		authorized := v1.Group("")
 		authorized.Use(service.AuthMiddleware())
 		{
