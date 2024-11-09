@@ -14,6 +14,24 @@ definitions:
       subtitle:
         type: string
     type: object
+  dto.KakaoProfile:
+    properties:
+      nickName:
+        type: string
+    type: object
+  dto.KakaoTokens:
+    properties:
+      accessToken:
+        type: string
+      idToken:
+        type: string
+      refreshToken:
+        type: string
+    required:
+    - accessToken
+    - idToken
+    - refreshToken
+    type: object
   dto.ScheduleCalendarPreviewDTO:
     properties:
       date:
@@ -138,6 +156,13 @@ definitions:
       title:
         type: string
     type: object
+  dto.TokenResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
   models.Field:
     properties:
       content:
@@ -180,6 +205,109 @@ info:
   title: Tickit!
   version: "1.0"
 paths:
+  /api/auth:
+    delete:
+      consumes:
+      - application/json
+      description: 계정을 삭제합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 탈퇴하기
+      tags:
+      - Auth
+    get:
+      consumes:
+      - application/json
+      description: 사용자 프로필 정보를 가져옵니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.KakaoProfile'
+              type: object
+      summary: 프로필 가져오기
+      tags:
+      - Auth
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 카카오 계정으로 로그인합니다
+      parameters:
+      - description: 카카오 토큰
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/dto.KakaoTokens'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+      summary: 로그인하기
+      tags:
+      - Auth
+  /api/auth/logout:
+    delete:
+      consumes:
+      - application/json
+      description: 로그아웃합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 로그아웃하기
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 카카오 계정으로 회원가입합니다
+      parameters:
+      - description: 카카오 토큰
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/dto.KakaoTokens'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+      summary: 회원가입하기
+      tags:
+      - Auth
   /api/s3/presigned-url:
     get:
       consumes:

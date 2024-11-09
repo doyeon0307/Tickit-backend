@@ -35,9 +35,13 @@ func main() {
 	scheduleRepo := repository.NewScheduleRepository(db)
 	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo)
 
+	userRepo := repository.NewUserRepository(db)
+	userUsecase := usecase.NewUserUsecase(userRepo)
+
 	handlers := routes.HandlerContainer{
 		TicketUsecase:   ticketUsecase,
 		ScheduleUsecase: scheduleUsecase,
+		UserUsecase:     userUsecase,
 		S3Config:        *s3Config,
 	}
 
