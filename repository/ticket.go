@@ -23,15 +23,19 @@ func NewTicketRepository(db *mongo.Database) domain.TicketRepository {
 	}
 }
 
-func (m *ticketRepository) GetPreviews(ctx context.Context) ([]*models.TicketPreview, error) {
+func (m *ticketRepository) GetPreviews(ctx context.Context, userId string) ([]*models.TicketPreview, error) {
 	previews := make([]*models.TicketPreview, 0)
+
+	filter := bson.M{
+		"userId": userId,
+	}
 
 	opts := options.Find().SetProjection(bson.M{
 		"_id":   1,
 		"image": 1,
 	})
 
-	cursor, err := m.collection.Find(ctx, bson.M{}, opts)
+	cursor, err := m.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, &common.AppError{
 			Code:    common.ErrServer,
@@ -56,7 +60,7 @@ func (m *ticketRepository) GetPreviews(ctx context.Context) ([]*models.TicketPre
 	return previews, nil
 }
 
-func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Ticket, error) {
+func (m *ticketRepository) GetById(ctx context.Context, userId, id string) (*models.Ticket, error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, &common.AppError{
@@ -67,7 +71,7 @@ func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Tick
 	}
 
 	var ticket models.Ticket
-	err = m.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&ticket)
+	err = m.collection.FindOne(ctx, bson.M{"_id": objID, "userId": userId}).Decode(&ticket)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, &common.AppError{
@@ -86,7 +90,7 @@ func (m *ticketRepository) GetById(ctx context.Context, id string) (*models.Tick
 	return &ticket, nil
 }
 
-func (m *ticketRepository) Create(ctx context.Context, ticket *models.Ticket) (string, error) {
+func (m *ticketRepository) Create(ctx context.Context, userId string, ticket *models.Ticket) (string, error) {
 	result, err := m.collection.InsertOne(ctx, ticket)
 	if err != nil {
 		return "", &common.AppError{
@@ -100,7 +104,7 @@ func (m *ticketRepository) Create(ctx context.Context, ticket *models.Ticket) (s
 	return ticket.Id, nil
 }
 
-func (m *ticketRepository) Update(ctx context.Context, id string, ticket *models.Ticket) error {
+func (m *ticketRepository) Update(ctx context.Context, userId, id string, ticket *models.Ticket) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return &common.AppError{
@@ -112,6 +116,7 @@ func (m *ticketRepository) Update(ctx context.Context, id string, ticket *models
 
 	update := bson.M{
 		"$set": bson.M{
+			"userId":          userId,
 			"image":           ticket.Image,
 			"title":           ticket.Title,
 			"location":        ticket.Location,
@@ -122,7 +127,7 @@ func (m *ticketRepository) Update(ctx context.Context, id string, ticket *models
 		},
 	}
 
-	result, err := m.collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	result, err := m.collection.UpdateOne(ctx, bson.M{"_id": objID, "userId": userId}, update)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
@@ -142,7 +147,7 @@ func (m *ticketRepository) Update(ctx context.Context, id string, ticket *models
 	return nil
 }
 
-func (m *ticketRepository) Delete(ctx context.Context, id string) error {
+func (m *ticketRepository) Delete(ctx context.Context, userId, id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return &common.AppError{
@@ -152,7 +157,7 @@ func (m *ticketRepository) Delete(ctx context.Context, id string) error {
 		}
 	}
 
-	result, err := m.collection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := m.collection.DeleteOne(ctx, bson.M{"_id": objID, "userId": userId})
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,

@@ -2,6 +2,7 @@ package models
 
 type Ticket struct {
 	Id              string  `json:"id" bson:"_id,omitempty"`
+	UserId          string  `json:"userId" bson:"userId"`
 	Image           string  `json:"image" bson:"image"`
 	Title           string  `json:"title" bson:"title"`
 	Location        string  `json:"location" bson:"location"`
