@@ -133,52 +133,20 @@ definitions:
         type: string
       title:
         type: string
-      userId:
-        type: string
     required:
     - datetime
     - image
     - location
     - title
     type: object
-  dto.TicketUpdateDTO:
+  dto.TicketPreview:
     properties:
-      backgroundColor:
-        type: string
-      datetime:
-        type: string
-      fields:
-        items:
-          $ref: '#/definitions/dto.Field'
-        type: array
-      foregroundColor:
-        type: string
       id:
         type: string
       image:
         type: string
-      location:
-        type: string
-      title:
-        type: string
-      userId:
-        type: string
     type: object
-  dto.TokenResponse:
-    properties:
-      accessToken:
-        type: string
-      refreshToken:
-        type: string
-    type: object
-  models.Field:
-    properties:
-      content:
-        type: string
-      subtitle:
-        type: string
-    type: object
-  models.Ticket:
+  dto.TicketUpdateDTO:
     properties:
       backgroundColor:
         type: string
@@ -198,14 +166,19 @@ definitions:
         type: string
       title:
         type: string
-      userId:
+    type: object
+  dto.TokenResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
         type: string
     type: object
-  models.TicketPreview:
+  models.Field:
     properties:
-      id:
+      content:
         type: string
-      image:
+      subtitle:
         type: string
     type: object
 host: localhost:7000
@@ -527,7 +500,7 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.TicketPreview'
+                  $ref: '#/definitions/dto.TicketPreview'
               type: object
       security:
       - ApiKeyAuth: []
@@ -556,7 +529,7 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Ticket'
+                  $ref: '#/definitions/dto.TicketDTO'
               type: object
       security:
       - ApiKeyAuth: []
@@ -606,7 +579,7 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Ticket'
+                  $ref: '#/definitions/dto.TicketDTO'
               type: object
       security:
       - ApiKeyAuth: []
@@ -640,7 +613,7 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Ticket'
+                  $ref: '#/definitions/dto.TicketDTO'
               type: object
       security:
       - ApiKeyAuth: []

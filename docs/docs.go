@@ -547,7 +547,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.TicketPreview"
+                                            "$ref": "#/definitions/dto.TicketPreview"
                                         }
                                     }
                                 }
@@ -596,7 +596,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -645,7 +645,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -701,7 +701,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -956,70 +956,21 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
-        "dto.TicketUpdateDTO": {
+        "dto.TicketPreview": {
             "type": "object",
             "properties": {
-                "backgroundColor": {
-                    "type": "string"
-                },
-                "datetime": {
-                    "type": "string"
-                },
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Field"
-                    }
-                },
-                "foregroundColor": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "image": {
                     "type": "string"
-                },
-                "location": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
-        "dto.TokenResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Field": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "subtitle": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Ticket": {
+        "dto.TicketUpdateDTO": {
             "type": "object",
             "properties": {
                 "backgroundColor": {
@@ -1048,19 +999,27 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
                 },
-                "userId": {
+                "refreshToken": {
                     "type": "string"
                 }
             }
         },
-        "models.TicketPreview": {
+        "models.Field": {
             "type": "object",
             "properties": {
-                "id": {
+                "content": {
                     "type": "string"
                 },
-                "image": {
+                "subtitle": {
                     "type": "string"
                 }
             }
