@@ -31,6 +31,7 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 	}
 }
 
+// @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 목록 불러오기
 // @Description 홈 화면에 작성한 티켓 목록을 불러옵니다
@@ -63,6 +64,7 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 세부정보 불러오기
 // @Description 티켓 아이디로 세부정보를 불러옵니다
@@ -98,6 +100,7 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 생성하기
 // @Description 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
@@ -177,6 +180,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 수정하기
 // @Description 티켓을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
@@ -267,6 +271,7 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 삭제하기
 // @Description 티켓을 삭제합니다

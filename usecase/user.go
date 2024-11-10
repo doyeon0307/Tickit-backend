@@ -37,7 +37,7 @@ func (u userUsecase) CreateUser(idToken string, accessToken string) (string, err
 	if err != nil {
 		return "", &common.AppError{
 			Code:    common.ErrNotFound,
-			Message: "카카오로부터 사용자 정보를 불러오는데 실패했습니다",
+			Message: "ID Token: 카카오로부터 사용자 정보를 불러오는데 실패했습니다",
 			Err:     err,
 		}
 	}
@@ -46,7 +46,7 @@ func (u userUsecase) CreateUser(idToken string, accessToken string) (string, err
 	if err != nil {
 		return "", &common.AppError{
 			Code:    common.ErrNotFound,
-			Message: "카카오로부터 사용자 정보를 불러오는데 실패했습니다",
+			Message: "Access Token: 카카오로부터 사용자 정보를 불러오는데 실패했습니다",
 			Err:     err,
 		}
 	}

@@ -14,7 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, common.Error(
 				http.StatusUnauthorized,
-				"헤더에서 토큰을 찾을 수 없습니다",
+				"Authorization 헤더를 찾을 수 없습니다",
 			))
 			c.Abort()
 			return
@@ -24,7 +24,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, common.Error(
 				http.StatusUnauthorized,
-				"헤더에서 토큰을 찾을 수 없습니다",
+				"헤더에서 토큰을 찾을 수 없습니다. Bearer + 토큰 형태로 입력해주세요.",
 			))
 			c.Abort()
 			return

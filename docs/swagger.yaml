@@ -69,6 +69,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     required:
     - date
     - title
@@ -101,6 +103,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     type: object
   dto.ScheduleTicketPreviewDTO:
     properties:
@@ -129,6 +133,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     required:
     - datetime
     - image
@@ -154,6 +160,8 @@ definitions:
       location:
         type: string
       title:
+        type: string
+      userId:
         type: string
     type: object
   dto.TokenResponse:
@@ -190,6 +198,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     type: object
   models.TicketPreview:
     properties:
@@ -217,6 +227,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 탈퇴하기
       tags:
       - Auth
@@ -236,6 +248,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.KakaoProfile'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 프로필 가져오기
       tags:
       - Auth
@@ -278,6 +292,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 로그아웃하기
       tags:
       - Auth
@@ -351,6 +367,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleCalendarPreviewDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 달력에 일정 목록 불러오기
       tags:
       - Schedules
@@ -378,6 +396,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 일정 생성하기
       tags:
       - Schedules
@@ -399,6 +419,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 일정 삭제하기
       tags:
       - Schedules
@@ -424,6 +446,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 세부 일정 불러오기
       tags:
       - Schedules
@@ -456,6 +480,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 일정 수정하기
       tags:
       - Schedules
@@ -481,6 +507,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleTicketPreviewDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 생성 가능한 일정 목록 불러오기
       tags:
       - Schedules
@@ -501,6 +529,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.TicketPreview'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 목록 불러오기
       tags:
       - Tickets
@@ -528,6 +558,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 생성하기
       tags:
       - Tickets
@@ -549,6 +581,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 삭제하기
       tags:
       - Tickets
@@ -574,6 +608,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 세부정보 불러오기
       tags:
       - Tickets
@@ -606,7 +642,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 수정하기
       tags:
       - Tickets
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

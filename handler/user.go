@@ -21,11 +21,9 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 
 	users := rg.Group("/auth")
 	{
-		// 인증이 필요없는 엔드포인트
 		users.POST("/login", handler.Login)
 		users.POST("/register", handler.Register)
 
-		// 인증이 필요한 엔드포인트
 		authorized := users.Group("")
 		authorized.Use(service.AuthMiddleware())
 		{
@@ -173,6 +171,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Auth
 // @Summary 프로필 가져오기
 // @Description 사용자 프로필 정보를 가져옵니다
@@ -206,6 +205,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Auth
 // @Summary 탈퇴하기
 // @Description 계정을 삭제합니다
@@ -241,6 +241,7 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Auth
 // @Summary 로그아웃하기
 // @Description 로그아웃합니다

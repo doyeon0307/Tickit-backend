@@ -13,6 +13,10 @@ import (
 // @version 1.0
 // @description 소중한 기억을 나만의 티켓북에 기록하세요
 // @host localhost:7000
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 	s3Config, err := config.NewS3Config(
 		config.AwsAccessKey,

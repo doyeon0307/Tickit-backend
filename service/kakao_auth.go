@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,13 +12,78 @@ import (
 	"github.com/doyeon0307/tickit-backend/dto"
 )
 
-type Payload struct {
-	Aud       string `json:"aud"`
-	Sub       string `json:"sub"`
-	Auth_time string `json:"auth_time"`
-	Iss       string `json:"iss"`
-	Exp       string `json:"exp"`
-	Iat       string `json:"iat"`
+// KakaoUserResponse는 실제 카카오 API 응답 구조체입니다
+type KakaoUserResponse struct {
+	NickName        string `json:"nickName"`
+	ProfileImageURL string `json:"profileImageURL"`
+	ThumbnailURL    string `json:"thumbnailURL"`
+}
+
+func GetUserInfoFromKakao(accessToken string) (*dto.KakaoProfile, error) {
+	req, err := http.NewRequest("GET", "https://kapi.kakao.com/v1/api/talk/profile", nil)
+	if err != nil {
+		return nil, &common.AppError{
+			Code:    common.ErrServer,
+			Message: "Request 생성 실패",
+			Err:     err,
+		}
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, &common.AppError{
+			Code:    common.ErrServer,
+			Message: "HTTP 요청 실패",
+			Err:     err,
+		}
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, &common.AppError{
+			Code:    common.ErrServer,
+			Message: "응답 바디 읽기 실패",
+			Err:     err,
+		}
+	}
+
+	// Debug: 응답 로깅
+	fmt.Printf("Kakao API Response Status: %d\n", resp.StatusCode)
+	fmt.Printf("Kakao API Response Body: %s\n", string(body))
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: fmt.Sprintf("카카오 API 오류 (상태 코드: %d): %s", resp.StatusCode, string(body)),
+			Err:     fmt.Errorf("카카오 API 응답: %s", string(body)),
+		}
+	}
+
+	var kakaoResp KakaoUserResponse
+	if err := json.Unmarshal(body, &kakaoResp); err != nil {
+		return nil, &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "카카오 응답 파싱 실패",
+			Err:     err,
+		}
+	}
+
+	if kakaoResp.NickName == "" {
+		return nil, &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "사용자 닉네임을 찾을 수 없습니다",
+			Err:     fmt.Errorf("empty nickname in response"),
+		}
+	}
+
+	return &dto.KakaoProfile{
+		NickName: kakaoResp.NickName,
+	}, nil
 }
 
 func GetOAuthIdFromKakao(idToken string) (string, error) {
@@ -38,7 +104,9 @@ func GetOAuthIdFromKakao(idToken string) (string, error) {
 		}
 	}
 
-	var claims Payload
+	var claims struct {
+		Sub string `json:"sub"`
+	}
 	if err := json.Unmarshal(payload, &claims); err != nil {
 		return "", &common.AppError{
 			Code:    common.ErrBadRequest,
@@ -55,45 +123,4 @@ func GetOAuthIdFromKakao(idToken string) (string, error) {
 	}
 
 	return claims.Sub, nil
-}
-
-func GetUserInfoFromKakao(accessToken string) (*dto.KakaoProfile, error) {
-	req, err := http.NewRequest("GET", "https://kapi.kakao.com/v2/user/me", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, &common.AppError{
-			Code:    common.ErrBadRequest,
-			Message: "카카오 서버에서 사용자 정보를 불러오는데 실패했습니다",
-			Err:     err,
-		}
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var profile dto.KakaoProfile
-	convertErr := json.Unmarshal(body, &profile)
-	if convertErr != nil {
-		return nil, &common.AppError{
-			Code:    common.ErrBadRequest,
-			Message: "사용자 정보 처리에 실패했습니다",
-			Err:     err,
-		}
-	}
-
-	return &profile, nil
 }

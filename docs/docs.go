@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/auth": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "사용자 프로필 정보를 가져옵니다",
                 "consumes": [
                     "application/json"
@@ -50,6 +55,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "계정을 삭제합니다",
                 "consumes": [
                     "application/json"
@@ -119,6 +129,11 @@ const docTemplate = `{
         },
         "/api/auth/logout": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "로그아웃합니다",
                 "consumes": [
                     "application/json"
@@ -211,6 +226,11 @@ const docTemplate = `{
         },
         "/api/schedules": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "시작 날짜와 종료 날짜 사이의 일정 목록을 불러옵니다",
                 "consumes": [
                     "application/json"
@@ -260,6 +280,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
@@ -306,6 +331,11 @@ const docTemplate = `{
         },
         "/api/schedules/for-ticket": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "현 날짜 이전의 일정 목록을 불러옵니다. 티켓 생성 화면의'일정 불러오기' 버튼에서 사용됩니다.",
                 "consumes": [
                     "application/json"
@@ -349,6 +379,11 @@ const docTemplate = `{
         },
         "/api/schedules/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "세부 일정을 불러옵니다",
                 "consumes": [
                     "application/json"
@@ -391,6 +426,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "일정을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
@@ -442,6 +482,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "일정을 삭제합니다",
                 "consumes": [
                     "application/json"
@@ -474,6 +519,11 @@ const docTemplate = `{
         },
         "/api/tickets": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "홈 화면에 작성한 티켓 목록을 불러옵니다",
                 "consumes": [
                     "application/json"
@@ -507,6 +557,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
@@ -553,6 +608,11 @@ const docTemplate = `{
         },
         "/api/tickets/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "티켓 아이디로 세부정보를 불러옵니다",
                 "consumes": [
                     "application/json"
@@ -595,6 +655,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "티켓을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
                 "consumes": [
                     "application/json"
@@ -646,6 +711,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "티켓을 삭제합니다",
                 "consumes": [
                     "application/json"
@@ -787,6 +857,9 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },
@@ -830,6 +903,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -880,6 +956,9 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },
@@ -911,6 +990,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -966,6 +1048,9 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },
@@ -979,6 +1064,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
