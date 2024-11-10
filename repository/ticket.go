@@ -91,7 +91,18 @@ func (m *ticketRepository) GetById(ctx context.Context, userId, id string) (*mod
 }
 
 func (m *ticketRepository) Create(ctx context.Context, userId string, ticket *models.Ticket) (string, error) {
-	result, err := m.collection.InsertOne(ctx, ticket)
+	model := *&models.Ticket{
+		Id:              ticket.Id,
+		UserId:          userId,
+		Image:           ticket.Image,
+		Title:           ticket.Title,
+		Location:        ticket.Location,
+		Datetime:        ticket.Datetime,
+		BackgroundColor: ticket.BackgroundColor,
+		ForegroundColor: ticket.ForegroundColor,
+		Fields:          ticket.Fields,
+	}
+	result, err := m.collection.InsertOne(ctx, model)
 	if err != nil {
 		return "", &common.AppError{
 			Code:    common.ErrServer,
