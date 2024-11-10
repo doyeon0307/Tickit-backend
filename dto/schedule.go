@@ -14,6 +14,7 @@ type ScheduleTicketPreviewDTO struct {
 }
 
 type ScheduleDTO struct {
+	UserId    string `json:"userId"`
 	Date      string `json:"date" binding:"required"`
 	Title     string `json:"title" binding:"required"`
 	Number    int    `json:"number"`
@@ -30,6 +31,7 @@ type ScheduleDTO struct {
 
 type ScheduleResponseDTO struct {
 	Id        string `json:"id"`
+	UserId    string `json:"userId"`
 	Date      string `json:"date"`
 	Title     string `json:"title"`
 	Number    int    `json:"number"`

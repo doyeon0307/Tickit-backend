@@ -18,8 +18,8 @@ func NewScheduleUsecase(repo domain.ScheduleRepository) domain.ScheduleUsecase {
 	}
 }
 
-func (u scheduleUsecase) GetSchedulePreviewsForTicket(date string) ([]*dto.ScheduleTicketPreviewDTO, error) {
-	schedules, err := u.scheduleRepo.GetPreviewsForTicket(context.Background(), date)
+func (u scheduleUsecase) GetSchedulePreviewsForTicket(userId, date string) ([]*dto.ScheduleTicketPreviewDTO, error) {
+	schedules, err := u.scheduleRepo.GetPreviewsForTicket(context.Background(), userId, date)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +36,8 @@ func (u scheduleUsecase) GetSchedulePreviewsForTicket(date string) ([]*dto.Sched
 	return previews, nil
 }
 
-func (u scheduleUsecase) GetSchedulePreviewsForCalendar(startDate, endDate string) ([]*dto.ScheduleCalendarPreviewDTO, error) {
-	schedules, err := u.scheduleRepo.GetPreviewsForCalendar(context.Background(), startDate, endDate)
+func (u scheduleUsecase) GetSchedulePreviewsForCalendar(userId, startDate, endDate string) ([]*dto.ScheduleCalendarPreviewDTO, error) {
+	schedules, err := u.scheduleRepo.GetPreviewsForCalendar(context.Background(), userId, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +55,8 @@ func (u scheduleUsecase) GetSchedulePreviewsForCalendar(startDate, endDate strin
 	return previews, nil
 }
 
-func (u scheduleUsecase) GetScheduleById(id string) (*dto.ScheduleResponseDTO, error) {
-	model, err := u.scheduleRepo.GetById(context.Background(), id)
+func (u scheduleUsecase) GetScheduleById(userId, id string) (*dto.ScheduleResponseDTO, error) {
+	model, err := u.scheduleRepo.GetById(context.Background(), userId, id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +80,9 @@ func (u scheduleUsecase) GetScheduleById(id string) (*dto.ScheduleResponseDTO, e
 	return schedule, nil
 }
 
-func (u scheduleUsecase) CreateSchedule(schedule *dto.ScheduleDTO) (*dto.ScheduleResponseDTO, error) {
+func (u scheduleUsecase) CreateSchedule(userId string, schedule *dto.ScheduleDTO) (*dto.ScheduleResponseDTO, error) {
 	model := &models.Schedule{
+		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,
@@ -98,12 +99,12 @@ func (u scheduleUsecase) CreateSchedule(schedule *dto.ScheduleDTO) (*dto.Schedul
 
 	id, err := u.scheduleRepo.Create(context.Background(), model)
 	if err != nil {
-		tmp := &dto.ScheduleResponseDTO{}
-		return tmp, err
+		return &dto.ScheduleResponseDTO{}, err
 	}
 
 	result := &dto.ScheduleResponseDTO{
 		Id:        id,
+		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,
@@ -120,8 +121,9 @@ func (u scheduleUsecase) CreateSchedule(schedule *dto.ScheduleDTO) (*dto.Schedul
 	return result, nil
 }
 
-func (u scheduleUsecase) UpdateSchedule(id string, schedule *dto.ScheduleResponseDTO) (*dto.ScheduleResponseDTO, error) {
+func (u scheduleUsecase) UpdateSchedule(userId, id string, schedule *dto.ScheduleResponseDTO) (*dto.ScheduleResponseDTO, error) {
 	model := &models.Schedule{
+		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,
@@ -136,9 +138,14 @@ func (u scheduleUsecase) UpdateSchedule(id string, schedule *dto.ScheduleRespons
 		Memo:      schedule.Memo,
 	}
 
-	err := u.scheduleRepo.Update(context.Background(), id, model)
+	err := u.scheduleRepo.Update(context.Background(), userId, id, model)
+	if err != nil {
+		return nil, err
+	}
+
 	result := &dto.ScheduleResponseDTO{
 		Id:        id,
+		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,
@@ -152,9 +159,9 @@ func (u scheduleUsecase) UpdateSchedule(id string, schedule *dto.ScheduleRespons
 		Link:      schedule.Link,
 		Memo:      schedule.Memo,
 	}
-	return result, err
+	return result, nil
 }
 
-func (u scheduleUsecase) DeleteSchedule(id string) error {
-	return u.scheduleRepo.Delete(context.Background(), id)
+func (u scheduleUsecase) DeleteSchedule(userId, id string) error {
+	return u.scheduleRepo.Delete(context.Background(), userId, id)
 }

@@ -6,6 +6,7 @@ type Field struct {
 }
 
 type TicketDTO struct {
+	UserId          string  `json:"userId"`
 	Image           string  `json:"image" binding:"required"`
 	Title           string  `json:"title" binding:"required"`
 	Location        string  `json:"location" binding:"required"`
@@ -17,6 +18,7 @@ type TicketDTO struct {
 
 type TicketResponseDTO struct {
 	Id              string  `json:"id"`
+	UserId          string  `json:"userId"`
 	Image           string  `json:"image"`
 	Title           string  `json:"title"`
 	Location        string  `json:"location"`
@@ -28,6 +30,7 @@ type TicketResponseDTO struct {
 
 type TicketUpdateDTO struct {
 	Id              string  `json:"id"`
+	UserId          string  `json:"userId"`
 	Image           string  `json:"image"`
 	Title           string  `json:"title"`
 	Location        string  `json:"location"`

@@ -2,6 +2,7 @@ package models
 
 type Schedule struct {
 	Id        string `json:"id" bson:"_id,omitempty"`
+	UserId    string `json:"userId" bson:"userId"`
 	Date      string `json:"date" bson:"date"`
 	Title     string `json:"title" bson:"title"`
 	Number    int    `json:"number" bson:"number"`

@@ -29,6 +29,7 @@ func NewScheduleHandler(rg *gin.RouterGroup, usecase domain.ScheduleUsecase) {
 	}
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 티켓 생성 가능한 일정 목록 불러오기
 // @Description 현 날짜 이전의 일정 목록을 불러옵니다. 티켓 생성 화면의'일정 불러오기' 버튼에서 사용됩니다.
@@ -38,6 +39,7 @@ func NewScheduleHandler(rg *gin.RouterGroup, usecase domain.ScheduleUsecase) {
 // @Success 200 {object} common.Response{data=dto.ScheduleTicketPreviewDTO}
 // @Router /api/schedules/for-ticket [get]
 func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
+	userId, _ := c.Get("userId")
 	date := c.Query("date")
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
@@ -51,7 +53,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
 			return
 		}
 	}
-	previews, err := h.scheduleUsecase.GetSchedulePreviewsForTicket(date)
+	previews, err := h.scheduleUsecase.GetSchedulePreviewsForTicket(userId.(string), date)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -73,6 +75,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 달력에 일정 목록 불러오기
 // @Description 시작 날짜와 종료 날짜 사이의 일정 목록을 불러옵니다
@@ -83,6 +86,8 @@ func (h *ScheduleHandler) GetSchedulePreviewsForTicket(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleCalendarPreviewDTO}
 // @Router /api/schedules [get]
 func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	startDate := c.Query("startDate")
 	endDate := c.Query("endDate")
 
@@ -102,7 +107,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
 		return
 	}
 
-	previews, err := h.scheduleUsecase.GetSchedulePreviewsForCalendar(startDate, endDate)
+	previews, err := h.scheduleUsecase.GetSchedulePreviewsForCalendar(userId.(string), startDate, endDate)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -124,6 +129,7 @@ func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 세부 일정 불러오기
 // @Description 세부 일정을 불러옵니다
@@ -133,6 +139,8 @@ func (h *ScheduleHandler) GetSchedulePreviewsForCalendar(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules/{id} [get]
 func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -141,7 +149,7 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 		))
 	}
 
-	schedule, err := h.scheduleUsecase.GetScheduleById(id)
+	schedule, err := h.scheduleUsecase.GetScheduleById(userId.(string), id)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -163,6 +171,7 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 일정 생성하기
 // @Description 일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
@@ -172,6 +181,8 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules [post]
 func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	var schedule dto.ScheduleDTO
 	if err := c.ShouldBindJSON(&schedule); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -180,7 +191,7 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 		))
 		return
 	}
-	resp, err := h.scheduleUsecase.CreateSchedule(&schedule)
+	resp, err := h.scheduleUsecase.CreateSchedule(userId.(string), &schedule)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -202,6 +213,7 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 일정 수정하기
 // @Description 일정을 수정합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
@@ -212,6 +224,8 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 // @Success 200 {object} common.Response{data=dto.ScheduleResponseDTO}
 // @Router /api/schedules/{id} [put]
 func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	var schedule dto.ScheduleResponseDTO
 
@@ -222,7 +236,7 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 		))
 	}
 
-	if _, err := h.scheduleUsecase.GetScheduleById(id); err != nil {
+	if _, err := h.scheduleUsecase.GetScheduleById(userId.(string), id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -245,7 +259,7 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.scheduleUsecase.UpdateSchedule(id, &schedule)
+	resp, err := h.scheduleUsecase.UpdateSchedule(userId.(string), id, &schedule)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -267,6 +281,7 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 	))
 }
 
+// @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 일정 삭제하기
 // @Description 일정을 삭제합니다
@@ -276,6 +291,8 @@ func (h *ScheduleHandler) UpdateSchedule(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/schedules/{id} [delete]
 func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
+	userId, _ := c.Get("userId")
+
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -284,7 +301,7 @@ func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
 		))
 	}
 
-	if _, err := h.scheduleUsecase.GetScheduleById(id); err != nil {
+	if _, err := h.scheduleUsecase.GetScheduleById(userId.(string), id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -299,7 +316,7 @@ func (h *ScheduleHandler) DeleteSchedule(c *gin.Context) {
 		return
 	}
 
-	err := h.scheduleUsecase.DeleteSchedule(id)
+	err := h.scheduleUsecase.DeleteSchedule(userId.(string), id)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(

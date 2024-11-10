@@ -14,6 +14,24 @@ definitions:
       subtitle:
         type: string
     type: object
+  dto.KakaoProfile:
+    properties:
+      nickName:
+        type: string
+    type: object
+  dto.KakaoTokens:
+    properties:
+      accessToken:
+        type: string
+      idToken:
+        type: string
+      refreshToken:
+        type: string
+    required:
+    - accessToken
+    - idToken
+    - refreshToken
+    type: object
   dto.ScheduleCalendarPreviewDTO:
     properties:
       date:
@@ -51,6 +69,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     required:
     - date
     - title
@@ -83,6 +103,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     type: object
   dto.ScheduleTicketPreviewDTO:
     properties:
@@ -111,6 +133,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     required:
     - datetime
     - image
@@ -136,6 +160,15 @@ definitions:
       location:
         type: string
       title:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.TokenResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
         type: string
     type: object
   models.Field:
@@ -165,6 +198,8 @@ definitions:
         type: string
       title:
         type: string
+      userId:
+        type: string
     type: object
   models.TicketPreview:
     properties:
@@ -180,6 +215,115 @@ info:
   title: Tickit!
   version: "1.0"
 paths:
+  /api/auth:
+    delete:
+      consumes:
+      - application/json
+      description: 계정을 삭제합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 탈퇴하기
+      tags:
+      - Auth
+    get:
+      consumes:
+      - application/json
+      description: 사용자 프로필 정보를 가져옵니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.KakaoProfile'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 프로필 가져오기
+      tags:
+      - Auth
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 카카오 계정으로 로그인합니다
+      parameters:
+      - description: 카카오 토큰
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/dto.KakaoTokens'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+      summary: 로그인하기
+      tags:
+      - Auth
+  /api/auth/logout:
+    delete:
+      consumes:
+      - application/json
+      description: 로그아웃합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 로그아웃하기
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 카카오 계정으로 회원가입합니다
+      parameters:
+      - description: 카카오 토큰
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/dto.KakaoTokens'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+      summary: 회원가입하기
+      tags:
+      - Auth
   /api/s3/presigned-url:
     get:
       consumes:
@@ -223,6 +367,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleCalendarPreviewDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 달력에 일정 목록 불러오기
       tags:
       - Schedules
@@ -250,6 +396,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 일정 생성하기
       tags:
       - Schedules
@@ -271,6 +419,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 일정 삭제하기
       tags:
       - Schedules
@@ -296,6 +446,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 세부 일정 불러오기
       tags:
       - Schedules
@@ -328,6 +480,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleResponseDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 일정 수정하기
       tags:
       - Schedules
@@ -353,6 +507,8 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ScheduleTicketPreviewDTO'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 생성 가능한 일정 목록 불러오기
       tags:
       - Schedules
@@ -373,6 +529,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.TicketPreview'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 목록 불러오기
       tags:
       - Tickets
@@ -400,6 +558,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 생성하기
       tags:
       - Tickets
@@ -421,6 +581,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 삭제하기
       tags:
       - Tickets
@@ -446,6 +608,8 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 세부정보 불러오기
       tags:
       - Tickets
@@ -478,7 +642,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.Ticket'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 티켓 수정하기
       tags:
       - Tickets
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

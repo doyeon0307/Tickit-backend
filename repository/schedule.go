@@ -22,10 +22,11 @@ func NewScheduleRepository(db *mongo.Database) domain.ScheduleRepository {
 	}
 }
 
-func (m *scheduleRepository) GetPreviewsForTicket(ctx context.Context, date string) ([]*models.Schedule, error) {
+func (m *scheduleRepository) GetPreviewsForTicket(ctx context.Context, userId, date string) ([]*models.Schedule, error) {
 	previews := make([]*models.Schedule, 0)
 
 	filter := bson.M{
+		"userId": userId,
 		"date": bson.M{
 			"$lte": date,
 		},
@@ -58,10 +59,11 @@ func (m *scheduleRepository) GetPreviewsForTicket(ctx context.Context, date stri
 	return previews, nil
 }
 
-func (m *scheduleRepository) GetPreviewsForCalendar(ctx context.Context, startDate, endDate string) ([]*models.Schedule, error) {
+func (m *scheduleRepository) GetPreviewsForCalendar(ctx context.Context, userId, startDate, endDate string) ([]*models.Schedule, error) {
 	previews := make([]*models.Schedule, 0)
 
 	filter := bson.M{
+		"userId": userId,
 		"date": bson.M{
 			"$gte": startDate,
 			"$lte": endDate,
@@ -95,7 +97,7 @@ func (m *scheduleRepository) GetPreviewsForCalendar(ctx context.Context, startDa
 	return previews, nil
 }
 
-func (m *scheduleRepository) GetById(ctx context.Context, id string) (*models.Schedule, error) {
+func (m *scheduleRepository) GetById(ctx context.Context, userId, id string) (*models.Schedule, error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, &common.AppError{
@@ -106,7 +108,7 @@ func (m *scheduleRepository) GetById(ctx context.Context, id string) (*models.Sc
 	}
 
 	var schedule models.Schedule
-	err = m.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&schedule)
+	err = m.collection.FindOne(ctx, bson.M{"_id": objID, "userId": userId}).Decode(&schedule)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, &common.AppError{
@@ -126,6 +128,7 @@ func (m *scheduleRepository) GetById(ctx context.Context, id string) (*models.Sc
 }
 
 func (m *scheduleRepository) Create(ctx context.Context, schedule *models.Schedule) (string, error) {
+	// Schedule에 이미 UserId가 설정되어 있다고 가정
 	result, err := m.collection.InsertOne(ctx, schedule)
 	if err != nil {
 		return "", &common.AppError{
@@ -139,7 +142,7 @@ func (m *scheduleRepository) Create(ctx context.Context, schedule *models.Schedu
 	return schedule.Id, nil
 }
 
-func (m *scheduleRepository) Update(ctx context.Context, id string, schedule *models.Schedule) error {
+func (m *scheduleRepository) Update(ctx context.Context, userId, id string, schedule *models.Schedule) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return &common.AppError{
@@ -149,11 +152,17 @@ func (m *scheduleRepository) Update(ctx context.Context, id string, schedule *mo
 		}
 	}
 
+	// userId 검증을 위한 필터 추가
+	filter := bson.M{
+		"_id":    objID,
+		"userId": userId,
+	}
+
 	update := bson.M{
 		"$set": bson.M{
 			"date":      schedule.Date,
 			"title":     schedule.Title,
-			"nubmer":    schedule.Number,
+			"number":    schedule.Number,
 			"image":     schedule.Image,
 			"thumbnail": schedule.Thumbnail,
 			"location":  schedule.Location,
@@ -163,10 +172,11 @@ func (m *scheduleRepository) Update(ctx context.Context, id string, schedule *mo
 			"company":   schedule.Company,
 			"link":      schedule.Link,
 			"memo":      schedule.Memo,
+			"userId":    userId, // userId도 함께 업데이트
 		},
 	}
 
-	result, err := m.collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	result, err := m.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
@@ -178,7 +188,7 @@ func (m *scheduleRepository) Update(ctx context.Context, id string, schedule *mo
 	if result.MatchedCount == 0 {
 		return &common.AppError{
 			Code:    common.ErrNotFound,
-			Message: "존재하지 않는 일정은 수정할 수 없습니다",
+			Message: "존재하지 않는 일정이거나 수정 권한이 없습니다",
 			Err:     err,
 		}
 	}
@@ -186,7 +196,7 @@ func (m *scheduleRepository) Update(ctx context.Context, id string, schedule *mo
 	return nil
 }
 
-func (m *scheduleRepository) Delete(ctx context.Context, id string) error {
+func (m *scheduleRepository) Delete(ctx context.Context, userId, id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return &common.AppError{
@@ -196,7 +206,13 @@ func (m *scheduleRepository) Delete(ctx context.Context, id string) error {
 		}
 	}
 
-	result, err := m.collection.DeleteOne(ctx, bson.M{"_id": objID})
+	// userId 검증을 위한 필터 추가
+	filter := bson.M{
+		"_id":    objID,
+		"userId": userId,
+	}
+
+	result, err := m.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
@@ -207,8 +223,8 @@ func (m *scheduleRepository) Delete(ctx context.Context, id string) error {
 
 	if result.DeletedCount == 0 {
 		return &common.AppError{
-			Code:    common.ErrBadRequest,
-			Message: "존재하지 않는 일정은 삭제할 수 없습니다",
+			Code:    common.ErrNotFound,
+			Message: "존재하지 않는 일정이거나 삭제 권한이 없습니다",
 			Err:     err,
 		}
 	}
