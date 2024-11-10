@@ -23,6 +23,7 @@ func NewS3Handler(rg *gin.RouterGroup, s3Config *config.S3Config) {
 	}
 }
 
+// @Security ApiKeyAuth
 // @Tags S3
 // @Summary Presigend URL 불러오기
 // @Description Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다

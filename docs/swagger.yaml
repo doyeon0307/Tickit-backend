@@ -69,8 +69,6 @@ definitions:
         type: string
       title:
         type: string
-      userId:
-        type: string
     required:
     - date
     - title
@@ -102,8 +100,6 @@ definitions:
       time:
         type: string
       title:
-        type: string
-      userId:
         type: string
     type: object
   dto.ScheduleTicketPreviewDTO:
@@ -309,6 +305,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Presigend URL 불러오기
       tags:
       - S3

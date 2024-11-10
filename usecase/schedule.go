@@ -104,7 +104,6 @@ func (u scheduleUsecase) CreateSchedule(userId string, schedule *dto.ScheduleDTO
 
 	result := &dto.ScheduleResponseDTO{
 		Id:        id,
-		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,
@@ -145,7 +144,6 @@ func (u scheduleUsecase) UpdateSchedule(userId, id string, schedule *dto.Schedul
 
 	result := &dto.ScheduleResponseDTO{
 		Id:        id,
-		UserId:    userId,
 		Date:      schedule.Date,
 		Title:     schedule.Title,
 		Number:    schedule.Number,

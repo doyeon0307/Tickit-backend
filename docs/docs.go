@@ -203,6 +203,11 @@ const docTemplate = `{
         },
         "/api/s3/presigned-url": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다",
                 "consumes": [
                     "application/json"
@@ -857,9 +862,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
@@ -903,9 +905,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "userId": {
                     "type": "string"
                 }
             }
