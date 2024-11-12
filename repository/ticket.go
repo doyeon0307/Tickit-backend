@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ticketRepository struct {
@@ -23,19 +22,14 @@ func NewTicketRepository(db *mongo.Database) domain.TicketRepository {
 	}
 }
 
-func (m *ticketRepository) GetPreviews(ctx context.Context, userId string) ([]*models.TicketPreview, error) {
-	previews := make([]*models.TicketPreview, 0)
+func (m *ticketRepository) GetPreviews(ctx context.Context, userId string) ([]*models.Ticket, error) {
+	previews := make([]*models.Ticket, 0)
 
 	filter := bson.M{
 		"userId": userId,
 	}
 
-	opts := options.Find().SetProjection(bson.M{
-		"_id":   1,
-		"image": 1,
-	})
-
-	cursor, err := m.collection.Find(ctx, filter, opts)
+	cursor, err := m.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, &common.AppError{
 			Code:    common.ErrServer,
@@ -54,7 +48,7 @@ func (m *ticketRepository) GetPreviews(ctx context.Context, userId string) ([]*m
 	}
 
 	if previews == nil {
-		previews = make([]*models.TicketPreview, 0)
+		previews = make([]*models.Ticket, 0)
 	}
 
 	return previews, nil
@@ -158,7 +152,7 @@ func (m *ticketRepository) Update(ctx context.Context, userId, id string, ticket
 	return nil
 }
 
-func (m *ticketRepository) Delete(ctx context.Context, userId, id string) error {
+func (m *ticketRepository) Delete(ctx context.Context, id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return &common.AppError{
@@ -168,7 +162,7 @@ func (m *ticketRepository) Delete(ctx context.Context, userId, id string) error 
 		}
 	}
 
-	result, err := m.collection.DeleteOne(ctx, bson.M{"_id": objID, "userId": userId})
+	result, err := m.collection.DeleteOne(ctx, bson.M{"_id": objID})
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
