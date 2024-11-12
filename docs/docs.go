@@ -203,6 +203,11 @@ const docTemplate = `{
         },
         "/api/s3/presigned-url": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Presigend URL를 얻고, 해당 URL을 통해 S3 이미지 업로드를 수행합니다",
                 "consumes": [
                     "application/json"
@@ -547,7 +552,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.TicketPreview"
+                                            "$ref": "#/definitions/dto.TicketPreview"
                                         }
                                     }
                                 }
@@ -596,7 +601,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -645,7 +650,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -701,7 +706,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Ticket"
+                                            "$ref": "#/definitions/dto.TicketDTO"
                                         }
                                     }
                                 }
@@ -857,9 +862,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
@@ -903,9 +905,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "userId": {
                     "type": "string"
                 }
             }
@@ -956,70 +955,21 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
-        "dto.TicketUpdateDTO": {
+        "dto.TicketPreview": {
             "type": "object",
             "properties": {
-                "backgroundColor": {
-                    "type": "string"
-                },
-                "datetime": {
-                    "type": "string"
-                },
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Field"
-                    }
-                },
-                "foregroundColor": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "image": {
                     "type": "string"
-                },
-                "location": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
                 }
             }
         },
-        "dto.TokenResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Field": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "subtitle": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Ticket": {
+        "dto.TicketUpdateDTO": {
             "type": "object",
             "properties": {
                 "backgroundColor": {
@@ -1048,19 +998,27 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
                 },
-                "userId": {
+                "refreshToken": {
                     "type": "string"
                 }
             }
         },
-        "models.TicketPreview": {
+        "models.Field": {
             "type": "object",
             "properties": {
-                "id": {
+                "content": {
                     "type": "string"
                 },
-                "image": {
+                "subtitle": {
                     "type": "string"
                 }
             }

@@ -16,8 +16,3 @@ type Field struct {
 	Subtitle string `json:"subtitle" bson:"subtitle"`
 	Content  string `json:"content" bson:"content"`
 }
-
-type TicketPreview struct {
-	Id    string `json:"id" bson:"_id"`
-	Image string `json:"image" bson:"image"`
-}

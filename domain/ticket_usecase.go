@@ -1,11 +1,13 @@
 package domain
 
-import "github.com/doyeon0307/tickit-backend/models"
+import (
+	"github.com/doyeon0307/tickit-backend/dto"
+)
 
 type TicketUsecase interface {
-	GetTicketPreviews(userId string) ([]*models.TicketPreview, error)
-	GetTicketByID(userId, id string) (*models.Ticket, error)
-	CreateTicket(userId string, ticket *models.Ticket) (string, error)
-	UpdateTicket(userId, id string, ticket *models.Ticket) error
-	DeleteTicket(userId, id string) error
+	GetTicketPreviews(userId string) ([]*dto.TicketPreview, error)
+	GetTicketByID(userId, id string) (*dto.TicketResponseDTO, error)
+	CreateTicket(userId string, ticket *dto.TicketDTO) (string, error)
+	UpdateTicket(userId, id string, ticket *dto.TicketUpdateDTO) error
+	DeleteTicket(id string) error
 }

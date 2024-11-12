@@ -52,6 +52,24 @@ func (m *userRepository) GetById(ctx context.Context, id string) (*models.User, 
 }
 
 func (m *userRepository) Create(ctx context.Context, user *models.User) (string, error) {
+	// oauthId가 이미 존재하는지 확인
+	exists, err := m.collection.CountDocuments(ctx, bson.M{"oauthId": user.OAuthId})
+	if err != nil {
+		return "", &common.AppError{
+			Code:    common.ErrServer,
+			Message: "데이터베이스 오류가 발생했습니다",
+			Err:     err,
+		}
+	}
+
+	if exists > 0 {
+		return "", &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "이미 존재하는 사용자입니다. 로그인을 시도해주세요.",
+			Err:     err,
+		}
+	}
+
 	result, err := m.collection.InsertOne(ctx, user)
 	if err != nil {
 		return "", &common.AppError{

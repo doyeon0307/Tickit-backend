@@ -4,17 +4,14 @@ import (
 	"net/http"
 
 	"github.com/doyeon0307/tickit-backend/common"
-	"github.com/doyeon0307/tickit-backend/config"
 	"github.com/doyeon0307/tickit-backend/domain"
 	"github.com/doyeon0307/tickit-backend/dto"
-	"github.com/doyeon0307/tickit-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TicketHandler struct {
 	ticketUsecase domain.TicketUsecase
-	s3Config      *config.S3Config
 }
 
 func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
@@ -37,7 +34,7 @@ func NewTicketHandler(rg *gin.RouterGroup, usecase domain.TicketUsecase) {
 // @Description 홈 화면에 작성한 티켓 목록을 불러옵니다
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.Response{data=models.TicketPreview}
+// @Success 200 {object} common.Response{data=dto.TicketPreview}
 // @Router /api/tickets [get]
 func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 	userId, _ := c.Get("userId")
@@ -71,7 +68,7 @@ func (h *TicketHandler) GetTicketPreviews(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "티켓 ID"
-// @Success 200 {object} common.Response{data=models.Ticket}
+// @Success 200 {object} common.Response{data=dto.TicketDTO}
 // @Router /api/tickets/{id} [get]
 func (h *TicketHandler) GetTicketById(c *gin.Context) {
 	userId, _ := c.Get("userId")
@@ -107,7 +104,7 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ticketDTO body dto.TicketDTO true "생성할 티켓 DTO"
-// @Success 200 {object} common.Response{data=models.Ticket}
+// @Success 200 {object} common.Response{data=dto.TicketDTO}
 // @Router /api/tickets [post]
 func (h *TicketHandler) MakeTicket(c *gin.Context) {
 	userId, _ := c.Get("userId")
@@ -129,24 +126,7 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 		req.ForegroundColor = "0xff000000"
 	}
 
-	ticket := &models.Ticket{
-		Image:           req.Image,
-		Title:           req.Title,
-		Location:        req.Location,
-		Datetime:        req.Datetime,
-		BackgroundColor: req.BackgroundColor,
-		ForegroundColor: req.ForegroundColor,
-		Fields:          make([]models.Field, len(req.Fields)),
-	}
-
-	for i, v := range req.Fields {
-		ticket.Fields[i] = models.Field{
-			Subtitle: v.Subtitle,
-			Content:  v.Content,
-		}
-	}
-
-	id, err := h.ticketUsecase.CreateTicket(userId.(string), ticket)
+	ticket, err := h.ticketUsecase.CreateTicket(userId.(string), &req)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -162,21 +142,10 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 		return
 	}
 
-	res := &dto.TicketResponseDTO{
-		Id:              id,
-		Image:           ticket.Image,
-		Title:           ticket.Title,
-		Location:        ticket.Location,
-		Datetime:        ticket.Datetime,
-		BackgroundColor: ticket.BackgroundColor,
-		ForegroundColor: ticket.ForegroundColor,
-		Fields:          make([]dto.Field, len(ticket.Fields)),
-	}
-
 	c.JSON(http.StatusCreated, common.Success(
 		http.StatusCreated,
 		"티켓이 생성되었습니다",
-		res,
+		ticket,
 	))
 }
 
@@ -188,13 +157,13 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 // @Produce json
 // @Param id path string true "티켓 ID"
 // @Param ticketDTO body dto.TicketUpdateDTO true "수정된 티켓 DTO"
-// @Success 200 {object} common.Response{data=models.Ticket}
+// @Success 200 {object} common.Response{data=dto.TicketDTO}
 // @Router /api/tickets/{id} [put]
 func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	userId, _ := c.Get("userId")
-
 	id := c.Param("id")
 
+	// 기존 티켓 존재 여부 확인
 	if _, err := h.ticketUsecase.GetTicketByID(userId.(string), id); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -211,7 +180,6 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 	}
 
 	var req dto.TicketUpdateDTO
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
@@ -220,25 +188,8 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 		return
 	}
 
-	ticket := &models.Ticket{
-		Image:           req.Image,
-		Title:           req.Title,
-		Location:        req.Location,
-		Datetime:        req.Datetime,
-		BackgroundColor: req.BackgroundColor,
-		ForegroundColor: req.ForegroundColor,
-		Fields:          make([]models.Field, len(req.Fields)),
-	}
-
-	for i, v := range req.Fields {
-		ticket.Fields[i] = models.Field{
-			Subtitle: v.Subtitle,
-			Content:  v.Content,
-		}
-	}
-
-	err := h.ticketUsecase.UpdateTicket(userId.(string), id, ticket)
-	if err != nil {
+	req.Id = id
+	if err := h.ticketUsecase.UpdateTicket(userId.(string), id, &req); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -253,21 +204,20 @@ func (h *TicketHandler) UpdateTicket(c *gin.Context) {
 		return
 	}
 
-	res := &dto.TicketResponseDTO{
-		Id:              id,
-		Image:           ticket.Image,
-		Title:           ticket.Title,
-		Location:        ticket.Location,
-		Datetime:        ticket.Datetime,
-		BackgroundColor: ticket.BackgroundColor,
-		ForegroundColor: ticket.ForegroundColor,
-		Fields:          make([]dto.Field, len(ticket.Fields)),
+	// 수정된 티켓 정보 조회
+	updatedTicket, err := h.ticketUsecase.GetTicketByID(userId.(string), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"수정된 티켓 정보 조회에 실패했습니다",
+		))
+		return
 	}
 
 	c.JSON(http.StatusAccepted, common.Success(
 		http.StatusAccepted,
 		"티켓이 수정되었습니다",
-		res,
+		updatedTicket,
 	))
 }
 
@@ -300,7 +250,7 @@ func (h *TicketHandler) DeleteTicket(c *gin.Context) {
 		return
 	}
 
-	err := h.ticketUsecase.DeleteTicket(userId.(string), id)
+	err := h.ticketUsecase.DeleteTicket(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
