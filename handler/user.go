@@ -21,8 +21,8 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 
 	users := rg.Group("/auth")
 	{
-		users.POST("/login", handler.Login)
-		users.POST("/register", handler.Register)
+		users.POST("/kakao/login", handler.Login)
+		users.POST("/kakao/register", handler.Register)
 
 		authorized := users.Group("")
 		authorized.Use(service.AuthMiddleware())
@@ -70,8 +70,8 @@ func (h *UserHandler) Login(c *gin.Context) {
 			))
 			return
 		}
-		c.JSON(http.StatusUnauthorized, common.Error(
-			http.StatusUnauthorized,
+		c.JSON(http.StatusNotFound, common.Error(
+			http.StatusNotFound,
 			"가입되지 않은 사용자입니다. 회원가입이 필요합니다.",
 		))
 		return
