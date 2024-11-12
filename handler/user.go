@@ -41,7 +41,7 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 // @Produce json
 // @Param tokens body dto.KakaoTokens true "카카오 토큰"
 // @Success 200 {object} common.Response{data=dto.TokenResponse} "성공"
-// @Router /api/auth/login [post]
+// @Router /api/auth/kakao/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var tokens dto.KakaoTokens
 	if err := c.ShouldBindJSON(&tokens); err != nil {
@@ -114,7 +114,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 // @Produce json
 // @Param tokens body dto.KakaoTokens true "카카오 토큰"
 // @Success 200 {object} common.Response{data=dto.TokenResponse}
-// @Router /api/auth/register [post]
+// @Router /api/auth/kakao/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var tokens dto.KakaoTokens
 	if err := c.ShouldBindJSON(&tokens); err != nil {

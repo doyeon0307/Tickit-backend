@@ -81,7 +81,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/login": {
+        "/api/auth/kakao/login": {
             "post": {
                 "description": "카카오 계정으로 로그인합니다",
                 "consumes": [
@@ -127,35 +127,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/logout": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "로그아웃합니다",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "로그아웃하기",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/register": {
+        "/api/auth/kakao/register": {
             "post": {
                 "description": "카카오 계정으로 회원가입합니다",
                 "consumes": [
@@ -196,6 +168,34 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "로그아웃합니다",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "로그아웃하기",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
                         }
                     }
                 }

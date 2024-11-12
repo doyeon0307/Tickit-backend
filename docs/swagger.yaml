@@ -222,7 +222,7 @@ paths:
       summary: 프로필 가져오기
       tags:
       - Auth
-  /api/auth/login:
+  /api/auth/kakao/login:
     post:
       consumes:
       - application/json
@@ -249,24 +249,7 @@ paths:
       summary: 로그인하기
       tags:
       - Auth
-  /api/auth/logout:
-    delete:
-      consumes:
-      - application/json
-      description: 로그아웃합니다
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/common.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 로그아웃하기
-      tags:
-      - Auth
-  /api/auth/register:
+  /api/auth/kakao/register:
     post:
       consumes:
       - application/json
@@ -291,6 +274,23 @@ paths:
                   $ref: '#/definitions/dto.TokenResponse'
               type: object
       summary: 회원가입하기
+      tags:
+      - Auth
+  /api/auth/logout:
+    delete:
+      consumes:
+      - application/json
+      description: 로그아웃합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 로그아웃하기
       tags:
       - Auth
   /api/s3/presigned-url:
