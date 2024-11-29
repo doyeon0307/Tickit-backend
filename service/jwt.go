@@ -14,7 +14,7 @@ type Claims struct {
 }
 
 const (
-	secretKey            = config.JwtSecretKey
+	secretKey            = config.JWT_SECRET_KEY
 	accessTokenDuration  = 24 * time.Hour
 	refreshTokenDuration = 30 * 24 * time.Hour
 )

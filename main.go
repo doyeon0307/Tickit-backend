@@ -19,8 +19,8 @@ import (
 
 func main() {
 	s3Config, err := config.NewS3Config(
-		config.AwsAccessKey,
-		config.AwsSecretKey,
+		config.AWS_ACCESS_KEY,
+		config.AWS_SCRET_KEY,
 		"us-east-1",
 		"tickit-s3-bucket",
 	)

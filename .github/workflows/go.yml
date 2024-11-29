@@ -9,6 +9,8 @@ on:
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/Tickit-backend
   JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SCRET_KEY: ${{ secrets.AWS_SCRET_KEY }}
 
 jobs:
   build:
