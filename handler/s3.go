@@ -5,6 +5,7 @@ import (
 
 	"github.com/doyeon0307/tickit-backend/common"
 	"github.com/doyeon0307/tickit-backend/config"
+	"github.com/doyeon0307/tickit-backend/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -45,6 +46,9 @@ func (h *S3Handler) GetPresignedUrl(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Success(
 		http.StatusOK,
 		"URL 생성에 성공했습니다",
-		url,
+		dto.S3UrlDTO{
+			Url: url,
+			Key: key,
+		},
 	))
 }
