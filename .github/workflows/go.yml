@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/your-image-name
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/Tickit-backend
 
 jobs:
   build:
@@ -42,10 +42,10 @@ jobs:
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
           docker pull ${{ env.DOCKER_IMAGE }}:latest
-          docker stop your-container-name || true
-          docker rm your-container-name || true
-          docker run -d --name your-container-name -p 7000:7000 ${{ env.DOCKER_IMAGE }}:latest
+          docker stop tickit-server-container || true
+          docker rm tickit-server-container || true
+          docker run -d --name tickit-server-container -p 7000:7000 ${{ env.DOCKER_IMAGE }}:latest
