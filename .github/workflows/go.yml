@@ -40,6 +40,11 @@ jobs:
         context: .
         push: true
         tags: ${{ env.DOCKER_IMAGE }}:latest
+        build-args: |
+          JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}
+          AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }}
+          AWS_SCRET_KEY=${{ env.AWS_SCRET_KEY }}
+
     
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
