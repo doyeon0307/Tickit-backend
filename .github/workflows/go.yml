@@ -10,7 +10,7 @@ env:
   DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/Tickit-backend
   JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SCRET_KEY: ${{ secrets.AWS_SCRET_KEY }}
+  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
 jobs:
   build:
@@ -43,7 +43,7 @@ jobs:
         build-args: |
           JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}
           AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }}
-          AWS_SCRET_KEY=${{ env.AWS_SCRET_KEY }}
+          AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }}
 
     
     - name: Deploy to EC2
@@ -60,5 +60,5 @@ jobs:
             -p 7000:7000 \
             -e JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }} \
             -e AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }} \
-            -e AWS_SCRET_KEY=${{ env.AWS_SCRET_KEY }} \
+            -e AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }} \
             ${{ env.DOCKER_IMAGE }}:latest
