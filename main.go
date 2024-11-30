@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/doyeon0307/tickit-backend/config"
 	"github.com/doyeon0307/tickit-backend/repository"
@@ -18,9 +19,12 @@ import (
 // @name Authorization
 
 func main() {
+	var awsAccessKey = os.Getenv("AWS_ACCESS_KEY")
+	var awsSecretKey = os.Getenv("AWS_SECRET_KEY")
+
 	s3Config, err := config.NewS3Config(
-		config.AWS_ACCESS_KEY,
-		config.AWS_SECRET_KEY,
+		awsAccessKey,
+		awsSecretKey,
 		"us-east-1",
 		"tickit-s3-bucket",
 	)
