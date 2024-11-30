@@ -46,5 +46,3 @@ func (s *S3Config) MakePresignURL(key string) (string, error) {
 
 	return presignReq.URL, nil
 }
-
-// test
