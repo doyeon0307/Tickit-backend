@@ -1,10 +1,10 @@
 package service
 
 import (
+	"os"
 	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
-	"github.com/doyeon0307/tickit-backend/config"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -13,7 +13,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var secretKey = config.JWT_SECRET_KEY
+var secretKey = os.Getenv("JWT_SECRET_KEY")
 
 const (
 	accessTokenDuration  = 24 * time.Hour
