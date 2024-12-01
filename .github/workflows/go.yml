@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/tickit-backend
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/Tickit-backend
   JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
