@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/doyeon0307/tickit-backend/domain"
 	"github.com/doyeon0307/tickit-backend/dto"
@@ -71,6 +72,7 @@ func (u ticketUsecase) CreateTicket(userId string, ticket *dto.TicketDTO) (strin
 		BackgroundColor: ticket.BackgroundColor,
 		ForegroundColor: ticket.ForegroundColor,
 		Fields:          fields,
+		CreatedAt:       time.Now(),
 	}
 
 	id, err := u.ticketRepo.Create(context.Background(), userId, model)

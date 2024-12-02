@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ticketRepository struct {
@@ -29,7 +30,9 @@ func (m *ticketRepository) GetPreviews(ctx context.Context, userId string) ([]*m
 		"userId": userId,
 	}
 
-	cursor, err := m.collection.Find(ctx, filter)
+	opts := options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}})
+
+	cursor, err := m.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, &common.AppError{
 			Code:    common.ErrServer,

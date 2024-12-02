@@ -1,65 +1,29 @@
-name: Go Build and Deploy
+- name: Build and push Docker image
+  uses: docker/build-push-action@v5
+  with:
+    context: .
+    push: true
+    tags: ${{ env.DOCKER_IMAGE }}:latest
+    build-args: |
+      JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+      AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-env:
-  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/tickit-backend
-  JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.23'
-    
-    - name: Build and Test
-      run: |
-        go build -v ./...
-        go test -v ./...
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
-    
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ env.DOCKER_IMAGE }}:latest
-        build-args: |
-          JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}
-          AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }}
-          AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }}
-
-    
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-        script: |
-          docker pull ${{ env.DOCKER_IMAGE }}:latest
-          docker stop tickit-server-container || true
-          docker rm tickit-server-container || true
-          docker run -d --name tickit-server-container \
-            -p 7000:7000 \
-            -e JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }} \
-            -e AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }} \
-            -e AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }} \
-            ${{ env.DOCKER_IMAGE }}:latest
-            
+- name: Deploy to EC2
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ubuntu
+    key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+    script: |
+      echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
+      echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
+      echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
+      
+      docker pull ${{ env.DOCKER_IMAGE }}:latest
+      docker stop tickit-server-container || true
+      docker rm tickit-server-container || true
+      docker run -d --name tickit-server-container \
+        -p 7000:7000 \
+        --env-file .env \
+        ${{ env.DOCKER_IMAGE }}:latest
