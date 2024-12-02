@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:7000",
+    "host": "98.83.61.212:7000",
     "paths": {
         "/api/auth": {
             "get": {
