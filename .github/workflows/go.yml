@@ -62,4 +62,3 @@ jobs:
             -e AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }} \
             -e AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }} \
             ${{ env.DOCKER_IMAGE }}:latest
-            
