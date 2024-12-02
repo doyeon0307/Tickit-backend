@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -9,7 +10,10 @@ import (
 )
 
 func ConnectDB() (*mongo.Database, error) {
-	connPattern := "mongodb://localhost:27017"
+	connPattern := os.Getenv("MONGODB_URI")
+	if connPattern == "" {
+		connPattern = "mongodb://localhost:27017"
+	}
 	clientOptions := options.Client().ApplyURI(connPattern)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
