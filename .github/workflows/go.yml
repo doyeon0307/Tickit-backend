@@ -50,7 +50,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # 이 부분을 수정
         port: 22
         script: |
           docker pull ***/tickit-backend:latest
