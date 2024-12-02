@@ -47,7 +47,7 @@ jobs:
           AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }}
           MONGODB_URI=${{ env.MONGODB_URI }}
 
-    - name: Create deployment directory
+    - name: Clean and prepare EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -55,7 +55,12 @@ jobs:
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          sudo rm -rf ~/app
           mkdir -p ~/app
+          docker system prune -af
+          sudo rm -rf /tmp/go-build*
+          sudo rm -rf /root/.cache/go-build
+          df -h
 
     - name: Copy project files to EC2
       uses: appleboy/scp-action@master
