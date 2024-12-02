@@ -12,7 +12,7 @@ import (
 // @title Tickit!
 // @version 1.0
 // @description 소중한 기억을 나만의 티켓북에 기록하세요
-// @host localhost:7000
+// @host 98.83.61.212:7000
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
