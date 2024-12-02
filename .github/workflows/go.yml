@@ -47,14 +47,14 @@ jobs:
           AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }}
           MONGODB_URI=${{ env.MONGODB_URI }}
 
-    - name: Copy docker-compose file to EC2
+    - name: Copy deployment files to EC2
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         port: 22
-        source: "docker-compose.yml"
+        source: "docker-compose.yml,Dockerfile"
         target: "~/"
 
     - name: Deploy to EC2
@@ -65,8 +65,10 @@ jobs:
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
           
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
