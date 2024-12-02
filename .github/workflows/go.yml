@@ -53,7 +53,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          docker pull ***/tickit-backend:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/tickit-backend:latest
           docker stop tickit-server-container || true
           docker rm tickit-server-container || true
           docker run -d --name tickit-server-container \
@@ -61,5 +61,4 @@ jobs:
             -e JWT_SECRET_KEY=*** \
             -e AWS_ACCESS_KEY=*** \
             -e AWS_SECRET_KEY=*** \
-            ***/tickit-backend:latest
-            
+            ${{ secrets.DOCKER_USERNAME }}/tickit-backend:latest            
