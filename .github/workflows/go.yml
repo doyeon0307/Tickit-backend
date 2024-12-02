@@ -65,11 +65,15 @@ jobs:
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
           echo "MONGODB_URI=mongodb://mongodb:27017" >> .env
-          docker compose down || true
-          docker compose pull
-          docker compose up -d
+          
+          docker-compose down || true
+          docker-compose pull
+          docker-compose up -d
