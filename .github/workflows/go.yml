@@ -62,3 +62,4 @@ jobs:
             -e AWS_ACCESS_KEY=*** \
             -e AWS_SECRET_KEY=*** \
             ***/tickit-backend:latest
+            
