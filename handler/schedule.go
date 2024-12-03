@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
@@ -174,7 +175,7 @@ func (h *ScheduleHandler) GetScheduleById(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Tags Schedules
 // @Summary 일정 생성하기
-// @Description 일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
+// @Description 일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.
 // @Accept json
 // @Produce json
 // @Param scheduleDTO body dto.ScheduleDTO true "일정 DTO"
@@ -191,6 +192,24 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 		))
 		return
 	}
+
+	if _, err := time.Parse("2006-01-02", schedule.Date); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"날짜 형식이 잘못되었습니다. YYYY-MM-DD 형식으로 입력해주세요.",
+		))
+		return
+	}
+
+	timePattern := `^(AM|PM)-(?:0[1-9]|1[0-2])-(?:[0-5][0-9])$`
+	if !regexp.MustCompile(timePattern).MatchString(schedule.Time) {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"시간 형식이 잘못되었습니다. AM/PM-HH-MM 형식으로 입력해주세요.",
+		))
+		return
+	}
+
 	resp, err := h.scheduleUsecase.CreateSchedule(userId.(string), &schedule)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
