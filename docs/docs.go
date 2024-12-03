@@ -290,7 +290,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
+                "description": "일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -567,7 +567,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.",
+                "description": "티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -926,16 +926,17 @@ const docTemplate = `{
         "dto.TicketDTO": {
             "type": "object",
             "required": [
-                "datetime",
+                "date",
                 "image",
                 "location",
+                "time",
                 "title"
             ],
             "properties": {
                 "backgroundColor": {
                     "type": "string"
                 },
-                "datetime": {
+                "date": {
                     "type": "string"
                 },
                 "fields": {
@@ -951,6 +952,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location": {
+                    "type": "string"
+                },
+                "time": {
                     "type": "string"
                 },
                 "title": {
@@ -971,11 +975,15 @@ const docTemplate = `{
         },
         "dto.TicketUpdateDTO": {
             "type": "object",
+            "required": [
+                "date",
+                "time"
+            ],
             "properties": {
                 "backgroundColor": {
                     "type": "string"
                 },
-                "datetime": {
+                "date": {
                     "type": "string"
                 },
                 "fields": {
@@ -994,6 +1002,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location": {
+                    "type": "string"
+                },
+                "time": {
                     "type": "string"
                 },
                 "title": {

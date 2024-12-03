@@ -115,7 +115,7 @@ definitions:
     properties:
       backgroundColor:
         type: string
-      datetime:
+      date:
         type: string
       fields:
         items:
@@ -127,12 +127,15 @@ definitions:
         type: string
       location:
         type: string
+      time:
+        type: string
       title:
         type: string
     required:
-    - datetime
+    - date
     - image
     - location
+    - time
     - title
     type: object
   dto.TicketPreview:
@@ -146,7 +149,7 @@ definitions:
     properties:
       backgroundColor:
         type: string
-      datetime:
+      date:
         type: string
       fields:
         items:
@@ -160,8 +163,13 @@ definitions:
         type: string
       location:
         type: string
+      time:
+        type: string
       title:
         type: string
+    required:
+    - date
+    - time
     type: object
   dto.TokenResponse:
     properties:
@@ -347,7 +355,7 @@ paths:
       consumes:
       - application/json
       description: 일정을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로
-        저장합니다.
+        저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.
       parameters:
       - description: 일정 DTO
         in: body
@@ -509,7 +517,7 @@ paths:
       consumes:
       - application/json
       description: 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로
-        저장합니다.
+        저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.
       parameters:
       - description: 생성할 티켓 DTO
         in: body

@@ -8,7 +8,7 @@ type Ticket struct {
 	Image           string    `json:"image" bson:"image"`
 	Title           string    `json:"title" bson:"title"`
 	Location        string    `json:"location" bson:"location"`
-	Datetime        string    `json:"datetime" bson:"datetime"`
+	DateTime        time.Time `json:"dateTime" bson:"dateTime"`
 	BackgroundColor string    `json:"backgroundColor" bson:"backgroundColor"`
 	ForegroundColor string    `json:"foregroundColor" bson:"foregroundColor"`
 	Fields          []Field   `json:"fields" bson:"fields"`

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"net/http"
+	"regexp"
+	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
 	"github.com/doyeon0307/tickit-backend/domain"
@@ -100,7 +102,7 @@ func (h *TicketHandler) GetTicketById(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Tags Tickets
 // @Summary 티켓 생성하기
-// @Description 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다.
+// @Description 티켓을 생성합니다. presigned-url을 발급받아 이미지 업로드를 완료한 후에, s3 url을 image 값으로 저장합니다. 날짜 형식은 YYYY-MM-DD, 시간 형식은 AM/PM-HH-MM입니다.
 // @Accept json
 // @Produce json
 // @Param ticketDTO body dto.TicketDTO true "생성할 티켓 DTO"
@@ -115,6 +117,23 @@ func (h *TicketHandler) MakeTicket(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
 			"Request Body가 잘못되었습니다",
+		))
+		return
+	}
+
+	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"날짜 형식이 잘못되었습니다. YYYY-MM-DD 형식으로 입력해주세요.",
+		))
+		return
+	}
+
+	timePattern := `^(AM|PM)-(?:0[1-9]|1[0-2])-(?:[0-5][0-9])$`
+	if !regexp.MustCompile(timePattern).MatchString(req.Time) {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"시간 형식이 잘못되었습니다. AM/PM-HH-MM 형식으로 입력해주세요.",
 		))
 		return
 	}
