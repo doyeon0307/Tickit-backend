@@ -11,7 +11,8 @@ type TicketDTO struct {
 	Image           string  `json:"image" binding:"required"`
 	Title           string  `json:"title" binding:"required"`
 	Location        string  `json:"location" binding:"required"`
-	Datetime        string  `json:"datetime" binding:"required"`
+	Date            string  `json:"date" binding:"required"`
+	Time            string  `json:"time" binding:"required"`
 	BackgroundColor string  `json:"backgroundColor"`
 	ForegroundColor string  `json:"foregroundColor"`
 	Fields          []Field `json:"fields"`
@@ -22,7 +23,8 @@ type TicketResponseDTO struct {
 	Image           string         `json:"image"`
 	Title           string         `json:"title"`
 	Location        string         `json:"location"`
-	Datetime        string         `json:"datetime"`
+	Date            string         `json:"date" binding:"required"`
+	Time            string         `json:"time" binding:"required"`
 	BackgroundColor string         `json:"backgroundColor"`
 	ForegroundColor string         `json:"foregroundColor"`
 	Fields          []models.Field `json:"fields"`
@@ -33,7 +35,8 @@ type TicketUpdateDTO struct {
 	Image           string         `json:"image"`
 	Title           string         `json:"title"`
 	Location        string         `json:"location"`
-	Datetime        string         `json:"datetime"`
+	Date            string         `json:"date" binding:"required"`
+	Time            string         `json:"time" binding:"required"`
 	BackgroundColor string         `json:"backgroundColor"`
 	ForegroundColor string         `json:"foregroundColor"`
 	Fields          []models.Field `json:"fields"`

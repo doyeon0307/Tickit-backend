@@ -7,6 +7,7 @@ import (
 	"github.com/doyeon0307/tickit-backend/domain"
 	"github.com/doyeon0307/tickit-backend/dto"
 	"github.com/doyeon0307/tickit-backend/models"
+	"github.com/doyeon0307/tickit-backend/utils"
 )
 
 type ticketUsecase struct {
@@ -41,12 +42,15 @@ func (u ticketUsecase) GetTicketByID(userId, id string) (*dto.TicketResponseDTO,
 		return nil, err
 	}
 
+	date, time := utils.SplitDateTime(model.DateTime)
+
 	ticket := &dto.TicketResponseDTO{
 		Id:              model.Id,
 		Image:           model.Image,
 		Title:           model.Title,
 		Location:        model.Location,
-		Datetime:        model.Datetime,
+		Date:            date,
+		Time:            time,
 		BackgroundColor: model.BackgroundColor,
 		ForegroundColor: model.ForegroundColor,
 		Fields:          model.Fields,
@@ -63,12 +67,18 @@ func (u ticketUsecase) CreateTicket(userId string, ticket *dto.TicketDTO) (strin
 		}
 	}
 
+	dateTime, err := utils.CombineDateTime(ticket.Date, ticket.Time)
+
+	if err != nil {
+		return "", err
+	}
+
 	model := &models.Ticket{
 		UserId:          userId,
 		Image:           ticket.Image,
 		Title:           ticket.Title,
 		Location:        ticket.Location,
-		Datetime:        ticket.Datetime,
+		DateTime:        dateTime,
 		BackgroundColor: ticket.BackgroundColor,
 		ForegroundColor: ticket.ForegroundColor,
 		Fields:          fields,
@@ -83,12 +93,18 @@ func (u ticketUsecase) CreateTicket(userId string, ticket *dto.TicketDTO) (strin
 }
 
 func (u ticketUsecase) UpdateTicket(userId, id string, ticket *dto.TicketUpdateDTO) error {
+	dateTime, err := utils.CombineDateTime(ticket.Date, ticket.Time)
+
+	if err != nil {
+		return err
+	}
+
 	model := &models.Ticket{
 		UserId:          userId,
 		Image:           ticket.Image,
 		Title:           ticket.Title,
 		Location:        ticket.Location,
-		Datetime:        ticket.Datetime,
+		DateTime:        dateTime,
 		BackgroundColor: ticket.BackgroundColor,
 		ForegroundColor: ticket.ForegroundColor,
 		Fields:          ticket.Fields,
