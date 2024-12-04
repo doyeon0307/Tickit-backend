@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -23,7 +22,4 @@ func init() {
 	if AWS_ACCESS_KEY == "" || AWS_SECRET_KEY == "" || JWT_SECRET_KEY == "" {
 		log.Fatal("Required environment variables are not set")
 	}
-
-	fmt.Println("AWS_ACCESS_KEY:", AWS_ACCESS_KEY)
-	fmt.Println("AWS_SECRET_KEY:", AWS_SECRET_KEY)
 }
