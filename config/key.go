@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -20,6 +20,7 @@ func init() {
 	AWS_SECRET_KEY = os.Getenv("AWS_SECRET_KEY")
 	JWT_SECRET_KEY = os.Getenv("JWT_SECRET_KEY")
 
-	fmt.Println("AWS_ACCESS_KEY:", AWS_ACCESS_KEY)
-	fmt.Println("AWS_SECRET_KEY:", AWS_SECRET_KEY)
+	if AWS_ACCESS_KEY == "" || AWS_SECRET_KEY == "" || JWT_SECRET_KEY == "" {
+		log.Fatal("Required environment variables are not set")
+	}
 }
