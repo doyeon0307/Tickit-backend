@@ -247,17 +247,9 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth [delete]
 func (h *UserHandler) Withdraw(c *gin.Context) {
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
+	userId, _ := c.Get("userId")
 
-	if err := h.userUsecase.WithdrawUser(userId); err != nil {
+	if err := h.userUsecase.WithdrawUser(userId.(string)); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -288,17 +280,9 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth/logout [delete]
 func (h *UserHandler) Logout(c *gin.Context) {
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
+	userId, _ := c.Get("userId")
 
-	if err := h.userUsecase.Logout(userId); err != nil {
+	if err := h.userUsecase.Logout(userId.(string)); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -331,15 +315,7 @@ func (h *UserHandler) Logout(c *gin.Context) {
 func (h *UserHandler) RefreshToken(c *gin.Context) {
 	var req dto.RefreshTokenRequest
 
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
+	userId, _ := c.Get("userId")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
@@ -349,7 +325,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	isValid, err := h.userUsecase.ValidateStoredRefreshToken(userId, req.RefreshToken)
+	isValid, err := h.userUsecase.ValidateStoredRefreshToken(userId.(string), req.RefreshToken)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -373,7 +349,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := service.GenerateAccessToken(userId)
+	accessToken, err := service.GenerateAccessToken(userId.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,

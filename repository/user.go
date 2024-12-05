@@ -156,11 +156,27 @@ func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, re
 }
 
 func (m *userRepository) GetRefreshToken(ctx context.Context, userId string) (string, error) {
-	filter := bson.M{"_id": userId}
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return "", &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "잘못된 아이디가 추출되었습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
+	filter := bson.M{"_id": objId}
 	var user models.User
 
-	err := m.collection.FindOne(ctx, filter).Decode(&user)
+	err = m.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", &common.AppError{
+				Code:    common.ErrNotFound,
+				Message: "사용자가 존재하지 않습니다. 토큰을 확인해주세요.",
+				Err:     err,
+			}
+		}
 		return "", &common.AppError{
 			Code:    common.ErrServer,
 			Message: "사용자 조회에 실패했습니다",
@@ -172,8 +188,17 @@ func (m *userRepository) GetRefreshToken(ctx context.Context, userId string) (st
 }
 
 func (m *userRepository) DeleteUser(ctx context.Context, userId string) error {
-	filter := bson.M{"_id": userId}
-	_, err := m.collection.DeleteOne(ctx, filter)
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "잘못된 아이디가 추출되었습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
+	filter := bson.M{"_id": objId}
+	result, err := m.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
@@ -181,11 +206,29 @@ func (m *userRepository) DeleteUser(ctx context.Context, userId string) error {
 			Err:     err,
 		}
 	}
+
+	if result.DeletedCount == 0 {
+		return &common.AppError{
+			Code:    common.ErrNotFound,
+			Message: "사용자가 존재하지 않습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
 	return nil
 }
 
 func (m *userRepository) RemoveRefreshToken(ctx context.Context, userId string) error {
-	filter := bson.M{"_id": userId}
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "잘못된 아이디가 추출되었습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
+	filter := bson.M{"_id": objId}
 	update := bson.M{
 		"$set": bson.M{
 			"refreshToken": "",
@@ -193,7 +236,7 @@ func (m *userRepository) RemoveRefreshToken(ctx context.Context, userId string) 
 		},
 	}
 
-	_, err := m.collection.UpdateOne(ctx, filter, update)
+	result, err := m.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
@@ -201,5 +244,14 @@ func (m *userRepository) RemoveRefreshToken(ctx context.Context, userId string) 
 			Err:     err,
 		}
 	}
+
+	if result.MatchedCount == 0 {
+		return &common.AppError{
+			Code:    common.ErrNotFound,
+			Message: "사용자가 존재하지 않습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
 	return nil
 }
