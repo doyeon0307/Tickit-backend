@@ -16,7 +16,7 @@ type Claims struct {
 var secretKey = os.Getenv("JWT_SECRET_KEY")
 
 const (
-	accessTokenDuration  = 24 * time.Hour
+	accessTokenDuration  = 30 * time.Minute
 	refreshTokenDuration = 30 * 24 * time.Hour
 )
 
