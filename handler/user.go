@@ -315,8 +315,6 @@ func (h *UserHandler) Logout(c *gin.Context) {
 func (h *UserHandler) RefreshToken(c *gin.Context) {
 	var req dto.RefreshTokenRequest
 
-	userId, _ := c.Get("userId")
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
@@ -325,7 +323,23 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	isValid, err := h.userUsecase.ValidateStoredRefreshToken(userId.(string), req.RefreshToken)
+	userId, err := service.ValidateToken(req.RefreshToken)
+	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusUnauthorized, common.Error(
+			http.StatusUnauthorized,
+			"유효하지 않은 Refresh Token입니다",
+		))
+		return
+	}
+
+	isValid, err := h.userUsecase.ValidateStoredRefreshToken(userId, req.RefreshToken)
 	if err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
@@ -349,7 +363,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := service.GenerateAccessToken(userId.(string))
+	accessToken, err := service.GenerateAccessToken(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
