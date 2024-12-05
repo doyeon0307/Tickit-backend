@@ -13,4 +13,5 @@ type UserUsecase interface {
 	DeleteUser(id string) error
 	GetUserByOAuthId(oauthId string) (*models.User, error)
 	SaveRefreshToken(userId string, refreshToken string, expiryTime time.Time) error
+	ValidateStoredRefreshToken(userId string, refreshToken string) (bool, error)
 }

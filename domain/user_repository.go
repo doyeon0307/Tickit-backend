@@ -13,4 +13,5 @@ type UserRepository interface {
 	Delete(ctx context.Context, id string) error
 	GetByOAuthId(ctx context.Context, oauthId string) (*models.User, error)
 	SaveRefreshToken(ctx context.Context, userId string, refreshToken string, expiryTime time.Time) error
+	GetRefreshToken(ctx context.Context, userId string) (string, error)
 }

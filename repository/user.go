@@ -154,3 +154,19 @@ func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, re
 
 	return nil
 }
+
+func (m *userRepository) GetRefreshToken(ctx context.Context, userId string) (string, error) {
+	filter := bson.M{"_id": userId}
+	var user models.User
+
+	err := m.collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return "", &common.AppError{
+			Code:    common.ErrServer,
+			Message: "사용자 조회에 실패했습니다",
+			Err:     err,
+		}
+	}
+
+	return user.RefreshToken, nil
+}

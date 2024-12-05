@@ -78,3 +78,16 @@ func (u *userUsecase) SaveRefreshToken(userId string, refreshToken string, expir
 	err := u.userRepo.SaveRefreshToken(context.Background(), userId, refreshToken, expiryTime)
 	return err
 }
+
+func (u *userUsecase) ValidateStoredRefreshToken(userId string, refreshToken string) (bool, error) {
+	storedToken, err := u.userRepo.GetRefreshToken(context.Background(), userId)
+	if err != nil {
+		return false, &common.AppError{
+			Code:    common.ErrServer,
+			Message: "Refresh Token 조회에 실패했습니다",
+			Err:     err,
+		}
+	}
+
+	return storedToken == refreshToken, nil
+}
