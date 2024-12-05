@@ -23,7 +23,7 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 	{
 		users.POST("/kakao/login", handler.Login)
 		users.POST("/kakao/register", handler.Register)
-		users.GET("/refresh", handler.RefreshToken)
+		users.POST("/refresh", handler.RefreshToken)
 
 		authorized := users.Group("")
 		authorized.Use(service.AuthMiddleware())
