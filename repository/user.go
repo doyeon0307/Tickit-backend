@@ -135,7 +135,16 @@ func (m *userRepository) GetByOAuthId(ctx context.Context, oauthId string) (*mod
 }
 
 func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, refreshToken string, expiryTime time.Time) error {
-	filter := bson.M{"_id": userId}
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrBadRequest,
+			Message: "잘못된 아이디가 추출되었습니다. 토큰을 확인해주세요.",
+			Err:     err,
+		}
+	}
+
+	filter := bson.M{"_id": objId}
 	update := bson.M{
 		"$set": bson.M{
 			"refreshToken": refreshToken,
@@ -143,7 +152,7 @@ func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, re
 		},
 	}
 
-	_, err := m.collection.UpdateOne(ctx, filter, update)
+	_, err = m.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return &common.AppError{
 			Code:    common.ErrServer,
