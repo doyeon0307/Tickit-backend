@@ -23,6 +23,7 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 	{
 		users.POST("/kakao/login", handler.Login)
 		users.POST("/kakao/register", handler.Register)
+		users.POST("/refresh", handler.RefreshToken)
 
 		authorized := users.Group("")
 		authorized.Use(service.AuthMiddleware())
@@ -30,7 +31,6 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 			authorized.DELETE("", handler.Withdraw)
 			authorized.DELETE("/logout", handler.Logout)
 			authorized.GET("", handler.GetProfile)
-			authorized.GET("/refresh", handler.RefreshToken)
 		}
 	}
 }
@@ -247,17 +247,9 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth [delete]
 func (h *UserHandler) Withdraw(c *gin.Context) {
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
+	userId, _ := c.Get("userId")
 
-	if err := h.userUsecase.WithdrawUser(userId); err != nil {
+	if err := h.userUsecase.WithdrawUser(userId.(string)); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -288,17 +280,9 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth/logout [delete]
 func (h *UserHandler) Logout(c *gin.Context) {
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
+	userId, _ := c.Get("userId")
 
-	if err := h.userUsecase.Logout(userId); err != nil {
+	if err := h.userUsecase.Logout(userId.(string)); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -331,20 +315,26 @@ func (h *UserHandler) Logout(c *gin.Context) {
 func (h *UserHandler) RefreshToken(c *gin.Context) {
 	var req dto.RefreshTokenRequest
 
-	userIdInterface, _ := c.Get("userId")
-	userId, ok := userIdInterface.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, common.Error(
-			http.StatusInternalServerError,
-			"사용자 ID 타입이 올바르지 않습니다",
-		))
-		return
-	}
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error(
 			http.StatusBadRequest,
 			"Request Body가 올바르지 않습니다. refreshToken이 포함되었는지 확인해주세요.",
+		))
+		return
+	}
+
+	userId, err := service.ValidateToken(req.RefreshToken)
+	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusUnauthorized, common.Error(
+			http.StatusUnauthorized,
+			"유효하지 않은 Refresh Token입니다",
 		))
 		return
 	}
