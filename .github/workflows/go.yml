@@ -91,6 +91,7 @@ jobs:
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
           echo "MONGODB_URI=mongodb://mongodb:27017" >> .env
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
           docker-compose down || true
           docker-compose pull
           docker-compose up -d

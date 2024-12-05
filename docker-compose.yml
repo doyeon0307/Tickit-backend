@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: app-app:latest
+    image: ${DOCKER_USERNAME}/tickit-backend:latest
     build:
       context: .
       args:
