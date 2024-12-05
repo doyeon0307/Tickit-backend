@@ -82,16 +82,32 @@ func (h *UserHandler) Login(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Access Token 생성에 실패했습니다",
 		))
 		return
 	}
 
-	refreshToken, err := service.GenerateRefreshToken(id)
+	refreshToken, expiryTime, err := service.GenerateRefreshToken(id)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Refresh Token 생성에 실패했습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.SaveRefreshToken(id, refreshToken, expiryTime); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"Refresh Token 저장에 오류가 발생했습니다",
 		))
 		return
 	}
@@ -151,11 +167,27 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	refreshToken, err := service.GenerateRefreshToken(userId)
+	refreshToken, expiryTime, err := service.GenerateRefreshToken(userId)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Refresh Token 생성에 실패했습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.SaveRefreshToken(userId, refreshToken, expiryTime); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"Refresh Token 저장에 오류가 발생했습니다",
 		))
 		return
 	}

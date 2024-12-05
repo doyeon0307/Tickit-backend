@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
 	"github.com/doyeon0307/tickit-backend/domain"
@@ -131,4 +132,25 @@ func (m *userRepository) GetByOAuthId(ctx context.Context, oauthId string) (*mod
 		}
 	}
 	return &user, nil
+}
+
+func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, refreshToken string, expiryTime time.Time) error {
+	filter := bson.M{"_id": userId}
+	update := bson.M{
+		"$set": bson.M{
+			"refreshToken": refreshToken,
+			"tokenExpiry":  expiryTime,
+		},
+	}
+
+	_, err := m.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrServer,
+			Message: "Refresh Token 저장에 실패했습니다",
+			Err:     err,
+		}
+	}
+
+	return nil
 }

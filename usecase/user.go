@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
 	"github.com/doyeon0307/tickit-backend/domain"
@@ -71,4 +72,9 @@ func (u *userUsecase) GetUserByOAuthId(oauthId string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (u *userUsecase) SaveRefreshToken(userId string, refreshToken string, expiryTime time.Time) error {
+	err := u.userRepo.SaveRefreshToken(context.Background(), userId, refreshToken, expiryTime)
+	return err
 }
