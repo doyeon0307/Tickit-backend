@@ -30,6 +30,7 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 			authorized.DELETE("", handler.Withdraw)
 			authorized.DELETE("/logout", handler.Logout)
 			authorized.GET("", handler.GetProfile)
+			authorized.GET("/refresh", handler.RefreshToken)
 		}
 	}
 }
@@ -246,10 +247,17 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth [delete]
 func (h *UserHandler) Withdraw(c *gin.Context) {
-	userId, _ := c.Get("userId")
+	userIdInterface, _ := c.Get("userId")
+	userId, ok := userIdInterface.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"사용자 ID 타입이 올바르지 않습니다",
+		))
+		return
+	}
 
-	err := h.userUsecase.DeleteUser(userId.(string))
-	if err != nil {
+	if err := h.userUsecase.WithdrawUser(userId); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -259,16 +267,14 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"회원탈퇴 중 오류가 발생했습니다",
+			"회원 탈퇴 처리 중 오류가 발생했습니다",
 		))
 		return
 	}
 
-	// TODO: 토큰 블랙리스트에 추가하는 로직 필요
-
 	c.JSON(http.StatusOK, common.Success(
 		http.StatusOK,
-		"회원탈퇴가 완료되었습니다",
+		"회원 탈퇴가 완료되었습니다",
 		nil,
 	))
 }
@@ -282,26 +288,41 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth/logout [delete]
 func (h *UserHandler) Logout(c *gin.Context) {
-	// token := c.GetHeader("Authorization")[7:] // "Bearer " 제거
-	// err := service.BlacklistToken(token)
-	// if err != nil {
-	//     c.JSON(http.StatusInternalServerError, common.Error(
-	//         http.StatusInternalServerError,
-	//         "로그아웃 처리 중 오류가 발생했습니다",
-	//     ))
-	//     return
-	// }
+	userIdInterface, _ := c.Get("userId")
+	userId, ok := userIdInterface.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"사용자 ID 타입이 올바르지 않습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.Logout(userId); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"로그아웃 처리 중 오류가 발생했습니다",
+		))
+		return
+	}
 
 	c.JSON(http.StatusOK, common.Success(
 		http.StatusOK,
-		"로그아웃 되었습니다",
+		"로그아웃이 완료되었습니다",
 		nil,
 	))
 }
 
 // @Tags Auth
 // @Summary Access Token 갱신하기
-// @Description Refresh Token으로 새로운 Access Token을 발급받습니다
+// @Description Refresh Token으로 새로운 Access Token을 합니다
 // @Accept json
 // @Produce json
 // @Param tokens body dto.RefreshTokenRequest true "Refresh Token"

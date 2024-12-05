@@ -91,3 +91,11 @@ func (u *userUsecase) ValidateStoredRefreshToken(userId string, refreshToken str
 
 	return storedToken == refreshToken, nil
 }
+
+func (u *userUsecase) WithdrawUser(userId string) error {
+	return u.userRepo.DeleteUser(context.Background(), userId)
+}
+
+func (u *userUsecase) Logout(userId string) error {
+	return u.userRepo.RemoveRefreshToken(context.Background(), userId)
+}
