@@ -32,6 +32,11 @@ definitions:
     - idToken
     - refreshToken
     type: object
+  dto.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        type: string
+    type: object
   dto.ScheduleCalendarPreviewDTO:
     properties:
       date:
@@ -299,6 +304,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 로그아웃하기
+      tags:
+      - Auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh Token으로 새로운 Access Token을 합니다
+      parameters:
+      - description: Refresh Token
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+      summary: Access Token 갱신하기
       tags:
       - Auth
   /api/s3/presigned-url:

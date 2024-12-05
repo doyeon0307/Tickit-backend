@@ -201,6 +201,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/refresh": {
+            "post": {
+                "description": "Refresh Token으로 새로운 Access Token을 합니다",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Access Token 갱신하기",
+                "parameters": [
+                    {
+                        "description": "Refresh Token",
+                        "name": "tokens",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TokenResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/s3/presigned-url": {
             "get": {
                 "security": [
@@ -798,6 +844,14 @@ const docTemplate = `{
                 "idToken": {
                     "type": "string"
                 },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RefreshTokenRequest": {
+            "type": "object",
+            "properties": {
                 "refreshToken": {
                     "type": "string"
                 }
