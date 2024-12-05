@@ -42,7 +42,8 @@ func GenerateAccessToken(userId string) (string, error) {
 	return accessToken, nil
 }
 
-func GenerateRefreshToken(userId string) (string, error) {
+func GenerateRefreshToken(userId string) (string, time.Time, error) {
+	expiryTime := time.Now().Add(refreshTokenDuration)
 	claims := Claims{
 		userId,
 		jwt.RegisteredClaims{
@@ -54,14 +55,14 @@ func GenerateRefreshToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	refreshToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
-		return "", &common.AppError{
+		return "", time.Time{}, &common.AppError{
 			Code:    common.ErrServer,
 			Message: "토큰 생성에 실패했습니다",
 			Err:     err,
 		}
 	}
 
-	return refreshToken, nil
+	return refreshToken, expiryTime, nil
 }
 
 func ValidateToken(tokenString string) (string, error) {

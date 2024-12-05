@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/doyeon0307/tickit-backend/common"
 	"github.com/doyeon0307/tickit-backend/domain"
@@ -131,4 +132,74 @@ func (m *userRepository) GetByOAuthId(ctx context.Context, oauthId string) (*mod
 		}
 	}
 	return &user, nil
+}
+
+func (m *userRepository) SaveRefreshToken(ctx context.Context, userId string, refreshToken string, expiryTime time.Time) error {
+	filter := bson.M{"_id": userId}
+	update := bson.M{
+		"$set": bson.M{
+			"refreshToken": refreshToken,
+			"tokenExpiry":  expiryTime,
+		},
+	}
+
+	_, err := m.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrServer,
+			Message: "Refresh Token 저장에 실패했습니다",
+			Err:     err,
+		}
+	}
+
+	return nil
+}
+
+func (m *userRepository) GetRefreshToken(ctx context.Context, userId string) (string, error) {
+	filter := bson.M{"_id": userId}
+	var user models.User
+
+	err := m.collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return "", &common.AppError{
+			Code:    common.ErrServer,
+			Message: "사용자 조회에 실패했습니다",
+			Err:     err,
+		}
+	}
+
+	return user.RefreshToken, nil
+}
+
+func (m *userRepository) DeleteUser(ctx context.Context, userId string) error {
+	filter := bson.M{"_id": userId}
+	_, err := m.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrServer,
+			Message: "사용자 삭제에 실패했습니다",
+			Err:     err,
+		}
+	}
+	return nil
+}
+
+func (m *userRepository) RemoveRefreshToken(ctx context.Context, userId string) error {
+	filter := bson.M{"_id": userId}
+	update := bson.M{
+		"$set": bson.M{
+			"refreshToken": "",
+			"tokenExpiry":  time.Time{},
+		},
+	}
+
+	_, err := m.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return &common.AppError{
+			Code:    common.ErrServer,
+			Message: "Refresh Token 삭제에 실패했습니다",
+			Err:     err,
+		}
+	}
+	return nil
 }

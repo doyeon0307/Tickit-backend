@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type OAuthType string
 
 const (
@@ -14,4 +16,6 @@ type User struct {
 	Name string `json:"name" bson:"name"`
 	// Email       string    `json:"email" bson:"email"`
 	// CreatedAt time.Time `json:"createdAt" bson:"createdAt,omitempty"`
+	RefreshToken string    `json:"refreshToken" bson:"refreshToken"`
+	TokenExpiry  time.Time `json:"tokenExpiry" bson:"tokenExpiry"`
 }

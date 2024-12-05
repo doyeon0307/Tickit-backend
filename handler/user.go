@@ -30,6 +30,7 @@ func NewUserHandler(rg *gin.RouterGroup, usecase domain.UserUsecase) {
 			authorized.DELETE("", handler.Withdraw)
 			authorized.DELETE("/logout", handler.Logout)
 			authorized.GET("", handler.GetProfile)
+			authorized.GET("/refresh", handler.RefreshToken)
 		}
 	}
 }
@@ -82,16 +83,32 @@ func (h *UserHandler) Login(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Access Token 생성에 실패했습니다",
 		))
 		return
 	}
 
-	refreshToken, err := service.GenerateRefreshToken(id)
+	refreshToken, expiryTime, err := service.GenerateRefreshToken(id)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Refresh Token 생성에 실패했습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.SaveRefreshToken(id, refreshToken, expiryTime); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"Refresh Token 저장에 오류가 발생했습니다",
 		))
 		return
 	}
@@ -151,11 +168,27 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	refreshToken, err := service.GenerateRefreshToken(userId)
+	refreshToken, expiryTime, err := service.GenerateRefreshToken(userId)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"토큰 생성에 실패했습니다",
+			"Refresh Token 생성에 실패했습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.SaveRefreshToken(userId, refreshToken, expiryTime); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"Refresh Token 저장에 오류가 발생했습니다",
 		))
 		return
 	}
@@ -214,10 +247,17 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth [delete]
 func (h *UserHandler) Withdraw(c *gin.Context) {
-	userId, _ := c.Get("userId")
+	userIdInterface, _ := c.Get("userId")
+	userId, ok := userIdInterface.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"사용자 ID 타입이 올바르지 않습니다",
+		))
+		return
+	}
 
-	err := h.userUsecase.DeleteUser(userId.(string))
-	if err != nil {
+	if err := h.userUsecase.WithdrawUser(userId); err != nil {
 		if appErr, ok := err.(*common.AppError); ok {
 			c.JSON(appErr.Code.StatusCode(), common.Error(
 				appErr.Code.StatusCode(),
@@ -227,16 +267,14 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, common.Error(
 			http.StatusInternalServerError,
-			"회원탈퇴 중 오류가 발생했습니다",
+			"회원 탈퇴 처리 중 오류가 발생했습니다",
 		))
 		return
 	}
 
-	// TODO: 토큰 블랙리스트에 추가하는 로직 필요
-
 	c.JSON(http.StatusOK, common.Success(
 		http.StatusOK,
-		"회원탈퇴가 완료되었습니다",
+		"회원 탈퇴가 완료되었습니다",
 		nil,
 	))
 }
@@ -250,19 +288,107 @@ func (h *UserHandler) Withdraw(c *gin.Context) {
 // @Success 200 {object} common.Response
 // @Router /api/auth/logout [delete]
 func (h *UserHandler) Logout(c *gin.Context) {
-	// token := c.GetHeader("Authorization")[7:] // "Bearer " 제거
-	// err := service.BlacklistToken(token)
-	// if err != nil {
-	//     c.JSON(http.StatusInternalServerError, common.Error(
-	//         http.StatusInternalServerError,
-	//         "로그아웃 처리 중 오류가 발생했습니다",
-	//     ))
-	//     return
-	// }
+	userIdInterface, _ := c.Get("userId")
+	userId, ok := userIdInterface.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"사용자 ID 타입이 올바르지 않습니다",
+		))
+		return
+	}
+
+	if err := h.userUsecase.Logout(userId); err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"로그아웃 처리 중 오류가 발생했습니다",
+		))
+		return
+	}
 
 	c.JSON(http.StatusOK, common.Success(
 		http.StatusOK,
-		"로그아웃 되었습니다",
+		"로그아웃이 완료되었습니다",
 		nil,
+	))
+}
+
+// @Tags Auth
+// @Summary Access Token 갱신하기
+// @Description Refresh Token으로 새로운 Access Token을 합니다
+// @Accept json
+// @Produce json
+// @Param tokens body dto.RefreshTokenRequest true "Refresh Token"
+// @Success 200 {object} common.Response{data=dto.TokenResponse}
+// @Router /api/auth/refresh [post]
+func (h *UserHandler) RefreshToken(c *gin.Context) {
+	var req dto.RefreshTokenRequest
+
+	userIdInterface, _ := c.Get("userId")
+	userId, ok := userIdInterface.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"사용자 ID 타입이 올바르지 않습니다",
+		))
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error(
+			http.StatusBadRequest,
+			"Request Body가 올바르지 않습니다. refreshToken이 포함되었는지 확인해주세요.",
+		))
+		return
+	}
+
+	isValid, err := h.userUsecase.ValidateStoredRefreshToken(userId, req.RefreshToken)
+	if err != nil {
+		if appErr, ok := err.(*common.AppError); ok {
+			c.JSON(appErr.Code.StatusCode(), common.Error(
+				appErr.Code.StatusCode(),
+				appErr.Message,
+			))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"Refresh Token 검증 도중 오류가 발생했습니다",
+		))
+		return
+	}
+
+	if !isValid {
+		c.JSON(http.StatusUnauthorized, common.Error(
+			http.StatusUnauthorized,
+			"저장된 Refresh Token과 일치하지 않습니다",
+		))
+		return
+	}
+
+	accessToken, err := service.GenerateAccessToken(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error(
+			http.StatusInternalServerError,
+			"새로운 Access Token 생성에 실패했습니다",
+		))
+		return
+	}
+
+	resp := &dto.TokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: req.RefreshToken,
+	}
+	c.JSON(http.StatusOK, common.Success(
+		http.StatusOK,
+		"토큰이 성공적으로 갱신되었습니다",
+		resp,
 	))
 }
